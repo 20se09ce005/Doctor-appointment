@@ -18,7 +18,6 @@ const decryptionProcess = async (req, res, next) => {
     try {
         const { mac, value } = req.body;
         const decrypt = await decryptData(mac, value);
-        console.log(decrypt, "decrypt------------------");
         req.body = { ...decrypt };
         next();
     } catch (error) {

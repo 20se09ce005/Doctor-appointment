@@ -209,21 +209,8 @@ const DecryptData = (req, res, next) => {
     }
 }
 
-const decryptionProcess = async (req, res, next) => {
-    try {
-        const { mac, value } = req.body;
-        const decrypt = await decryptData(mac, value);
-        console.log(decrypt, "decrypt------------------");
-        req.body = { ...decrypt };
-        next();
-    } catch (error) {
-        console.log(error);
-        return res.status(400).send({ message: "Data not encrypted properly.", error: error.message });
-    }
-}
-
 module.exports = {
     userregistration, login, getuserinfobyid, applydoctoraccount, markallnotificationsasseen,
     deleteallnotifications, getallapproveddoctors, bookappointment, checkbookingavilability,
-    getappointmentsbyuserid, DecryptData, decryptionProcess
+    getappointmentsbyuserid, DecryptData,
 }

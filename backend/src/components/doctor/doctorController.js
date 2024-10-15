@@ -38,7 +38,6 @@ const getappointmentsbydoctorid = async (req, res) => {
     try {
         const doctor = await Doctor.findOne({ userId: req.body.userId });
         const appointments = await Appointment.find({ doctorId: doctor._id });
-        console.log(req.body,"in getappointmentsbydoctorid function req body--------------------------");
         return common.sendSuccess(req, res, { messages: "Appointments fetched successfully", data: appointments });
     } catch (error) {
         console.log(error)
@@ -67,24 +66,6 @@ const changeappointmentstatus = async (req, res) => {
     }
 }
 
-const decryptionProcess = async (req, res, next) => {
-    try {
-        const { mac, value } = req.body;
-        const decrypt = await decryptData(mac, value);
-
-        req.body = decrypt;
-        console.log("req.body after decryption:", req.body);
-
-        // res.send(decrypt);
-        next();
-    } catch (error) {
-        console.log(error);
-        return res.status(400).send({ message: "Data not encrypted properly.", error: error.message });
-    }
-}
-
-
 module.exports = {
     getdoctorinfobyuserid, getdoctorinfobyid, updatedoctorprofile, getappointmentsbydoctorid, changeappointmentstatus,
-    decryptionProcess
 }

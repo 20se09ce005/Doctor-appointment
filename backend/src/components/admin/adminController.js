@@ -45,20 +45,4 @@ const changedoctoraccountstatus = async (req, res) => {
     }
 }
 
-const decryptionProcess = async (req, res, next) => {
-    try {
-        const { mac, value } = req.body;
-        const decrypt = await decryptData(mac, value);
-
-        req.body = decrypt;
-        console.log("req.data after decryption:", req.body);
-
-        // res.send(decrypt);
-        next();
-    } catch (error) {
-        console.log(error);
-        return res.status(400).send({ message: "Data not encrypted properly.", error: error.message });
-    }
-}
-
-module.exports = { getalldoctors, getallusers, changedoctoraccountstatus, decryptionProcess }
+module.exports = { getalldoctors, getallusers, changedoctoraccountstatus,  }
