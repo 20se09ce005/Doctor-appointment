@@ -1,0 +1,16 @@
+{
+    "PORT":"9999",
+    "MONGO_URL":"mongodb://localhost:27017/Doctor_Web",
+
+    "JWT_SECRET" :"HRZHEALTHY",
+
+    "SECRET_KEY" : "secret_key",
+    "SECRET_IV" : "secret_iv",
+    "ENCRYPTION_METHOD" : "aes-256-cbc",
+
+    "API_KEY_ENC":"SECRET_KEY",
+    "API_ENCRYPT_IV_KEY":"SECRET_IV",
+
+    "APT_KEY_DEC":"SECRET_KEY",
+    "APT_DECRYPT_IV_KEY":"SECRET_IV"
+}

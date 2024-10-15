@@ -1,0 +1,201 @@
+
+// service file -----------------------------------------------------------------------------------------------------------------------------------
+
+const errorHandler = (err) => {
+  const statusCode = err.response?.status ?? 0;
+  const data = {
+    errorData: '',
+    statusCode,
+    message: '',
+  };
+
+  if (err.response && err.response.data && err.response.data.message && statusCode != 401) {
+    ToastMe(err.response.data.message, 'error');
+  }
+
+  if (statusCode === 400 || statusCode === 401 || statusCode === 422) {
+    data.errorData = (err.response && err.response.data && err.response.data.errors) ? err.response.data.errors : '';
+    data.message = (err.response && err.response.data && err.response.data.message) ? err.response.data.message : '';
+  }
+  return data;
+}
+
+const AuthService = {
+
+  registration: (data) => {
+    return dispatch => (
+      new Promise((resolve, reject) => {
+        axiosFile.post(ServiceConstant.API_HOST + '/registration', data)
+          .then(function (res) {
+            // handle success
+            ToastMe(res.data.message);
+            dispatch(action.authRegister(res));
+            // // window.location.href = '/account_verification';
+            // dispatch(action.authRegisterVerifyOTP(res.data.verify_otp))
+            return resolve(res);
+          })
+          .catch(function (err) {
+            // handle error
+            const data = errorHandler(err);
+            return reject(data);
+          })
+
+      })
+    )
+  }
+}
+
+export default AuthService;
+
+
+// if you want to set token in your header create function in axios file and use this function in your api success code
+export function setBearerToken(token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
+
+// this is common function when you call api form anywhere default middleware or header option will set 
+function AxiosMiddleware(method, url, data, options) {
+  if ((data.env != 'test' && url.search("env=test") == -1) && (options && options?.Accept != 'multipart/form-data')) {
+    data = (new Security).encrypt(data);
+  }
+  axios.defaults.headers.common['site'] = `egemoney`;
+  axios.defaults.headers.common['device'] = `web`;
+  axios.defaults.headers.common['X-localization'] = `${localStorage.getItem('i18nextLng')}`;
+  switch (method) {
+    case 'get':
+      return axios.get(url, data, options);
+    case 'post':
+      return axios.post(url, data, options);
+    case 'head':
+      return axios.head(url, data, options);
+    case 'patch':
+      return axios.patch(url, data, options);
+    case 'put':
+      return axios.put(url, data, options);
+    case 'delete':
+      return axios.delete(url, { data: data, headers: options });
+  }
+
+}
+
+export function get(url, data = [], options = {}) {
+  return AxiosMiddleware('get', url, data, options)
+}
+export function post(url, data = [], options = {}) {
+  return AxiosMiddleware('post', url, data, options)
+}
+
+// this code for when you get unauthorized access from backend at that time first response in this section and after your api response
+axios.interceptors.response.use(
+  (response) => {
+    if (response.data.mac !== undefined) {
+      // here should be you decrypt function
+      response.data = (new Security).decrypt(response.data);
+    }
+    return response
+  },
+  (error) => {
+    if (error.response.status === 423) {
+      //clear localstorage
+    }
+    if (error.response.status === 401) {
+      //unauth 
+      var userdata = localStorage.getItem('jwt_token');
+      if (userdata) {
+        ToastMe(error.response.data.message);
+      }
+      //clear localstorage
+    }
+    return Promise.reject(error);
+  }
+)
+
+
+// route main index file---------------------------------------------------------------------------------------------------------------------------
+let obj = {
+  path: '/support_center',
+  layout: 'doctor' | "patient",
+  auth: false | true,
+  component: <SupportCenter title="Support Center" />,
+};
+
+<Route path="/" element={<AuthRoute />}> // your middleware (means login or without login)
+  <Route path="/" element={<Master ptitle={Component.props.title} pageNoIndex={auth} path={path} />}> //layout (Like doctore sidebar or patient sidebar)
+    <Route exact path={path} element={Component} />
+  </Route>
+</Route>
+
+// data encryptction ------------------------------------------------------------------------------------------------
+
+
+import CryptoJS from "crypto-js";
+import { serialize, unserialize } from "php-serialize";
+import base64 from 'base-64';
+import { API_ENCRYPTION_KEY, ENCRYPTION_IV_KEY, API_DECRYPTION_KEY, DECRYPTION_IV_KEY } from "../constants/SecurityConstant";
+
+class Security {
+    constructor() { }
+
+    encrypt(value, _serialize = false) {
+        const iv = ENCRYPTION_IV_KEY;
+        console.log("API_ENCRYPTION_KEY", API_ENCRYPTION_KEY);
+        console.log("ENCRYPTION_IV_KEY", ENCRYPTION_IV_KEY);
+        
+
+        // Ensure proper serialization
+        const dataToEncrypt = _serialize ? serialize(JSON.stringify(value)) : JSON.stringify(value);
+
+        // Encrypt the data
+        const encrypted = CryptoJS.AES.encrypt(dataToEncrypt, CryptoJS.enc.Utf8.parse(API_ENCRYPTION_KEY), {
+            iv: CryptoJS.enc.Utf8.parse(iv),
+            padding: CryptoJS.pad.Pkcs7,
+            mode: CryptoJS.mode.CBC,
+        }).toString();
+
+        // Generate MAC
+        const base64Iv = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(iv));
+        const mac = CryptoJS.HmacSHA256(base64Iv + encrypted, API_ENCRYPTION_KEY).toString();
+
+        return { value: encrypted, mac };
+    }
+
+    decrypt(response, _unserialize = false) {
+        const value = response.value;
+
+        try {
+            const decrypted = CryptoJS.AES.decrypt(value, CryptoJS.enc.Utf8.parse(API_DECRYPTION_KEY), {
+                iv: CryptoJS.enc.Utf8.parse(DECRYPTION_IV_KEY),
+                padding: CryptoJS.pad.Pkcs7,
+                mode: CryptoJS.mode.CBC,
+            }).toString(CryptoJS.enc.Utf8);
+
+
+            if (!decrypted) {
+                throw new Error("Decryption failed. Invalid data.");
+            }
+            return _unserialize ? unserialize(JSON.parse(decrypted)) : JSON.parse(decrypted);
+        } catch (error) {
+            console.error("Decryption error:", error);
+            throw new Error("DecryptionException - The data could not be decrypted.");
+        }
+    }
+
+}
+
+export default Security; 
+
+exports.decryptionProcess = async (req, res, next) => {
+    try {
+        const { mac, value } = req.body;
+        const decrypt = await decryptedDataResponse(mac, value);
+
+        // req.data = decrypt;
+        // console.log("req.data after decryption:", req.data);
+
+        res.send(decrypt);
+        // next();
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send({ message: "Data not encrypted properly.", error: error.message });
+    }
+};
