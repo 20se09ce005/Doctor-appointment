@@ -42,7 +42,7 @@ const login = async (req, res) => {
             return common.sendError(req, res, { messages: "Password dose not match" }, 401);
         } else {
             const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
-            return common.sendSuccess(req, res, { messages: "Login successful", data: token });
+            return common.sendSuccess(req, res, { messages: "Login successful", data: token,id:user._id });
         }
     } catch (error) {
         console.log(error)

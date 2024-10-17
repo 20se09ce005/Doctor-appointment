@@ -56,7 +56,9 @@ const changeappointmentstatus = async (req, res) => {
             message: status,
         });
         await newmessage.save();
-        io.io.emit("response",status);
+        const Id = appointment.userId;
+        const id=Id.toString();
+        io.io.emit(`response ${id}`,status);
         const user = await Patient.findOne({ _id: appointment.userId });
         const unseenNotifications = user.unseenNotifications;
         unseenNotifications.push({
