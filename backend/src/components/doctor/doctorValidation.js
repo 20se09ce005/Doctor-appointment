@@ -4,8 +4,6 @@ const { validator } = require("../validate");
 const common = require("../../utils/common");
 
 async function getUserIdValadation(req, res, next) {
-    console.log(req.body, "validation-----------------");
-    
     let rules = {
         userId: "required"
     };

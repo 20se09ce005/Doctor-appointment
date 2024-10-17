@@ -4,7 +4,6 @@ const { validator } = require("../validate");
 const common = require("../../utils/common");
 
 async function patientValadation(req, res, next) {
-
     let rules = {
         name: "required|min:3|regex:/^[A-Za-z ]+$/",
         email: "required|unique_email|email|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/",

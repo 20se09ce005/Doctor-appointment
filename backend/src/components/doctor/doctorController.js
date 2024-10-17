@@ -1,8 +1,9 @@
 const Doctor = require("./model/doctorSchema");
 const Appointment = require("../patient/model/appointmentSchema");
 const Patient = require("../patient/model/patientSchema");
+const Message = require("../patient/model/messagesSchema");
 const common = require("../../utils/common");
-const { decryptData } = require("../../utils/decryption");
+const io=require("../../index");
 
 const getdoctorinfobyuserid = async (req, res) => {
     try {
@@ -40,7 +41,7 @@ const getappointmentsbydoctorid = async (req, res) => {
         const appointments = await Appointment.find({ doctorId: doctor._id });
         return common.sendSuccess(req, res, { messages: "Appointments fetched successfully", data: appointments });
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         return common.sendError(req, res, { messages: error.message }, 500);
     }
 }
@@ -49,7 +50,13 @@ const changeappointmentstatus = async (req, res) => {
     try {
         const { appointmentId, status } = req.body;
         const appointment = await Appointment.findByIdAndUpdate(appointmentId, { status, });
-
+        const newmessage = new Message({
+            userId: appointment.userId,
+            doctorId: appointment.doctorId,
+            message: status,
+        });
+        await newmessage.save();
+        io.io.emit("response",status);
         const user = await Patient.findOne({ _id: appointment.userId });
         const unseenNotifications = user.unseenNotifications;
         unseenNotifications.push({
@@ -57,7 +64,6 @@ const changeappointmentstatus = async (req, res) => {
             messages: `Your appointment status has been ${status}`,
             onClickPath: "/appointments",
         });
-
         await user.save();
         return common.sendSuccess(req, res, { messages: "Appointment status updated successfully", data: appointment });
     } catch (error) {
