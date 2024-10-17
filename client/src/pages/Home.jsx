@@ -6,9 +6,17 @@ import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import { API_URL } from "../services/config";
 import { get } from "../services/axios";
+import toastMessage from "../utils/toast";
+import { socket } from "../utils/socket"
+
 function Home() {
   const [doctors, setDoctors] = useState([]);
   const dispatch = useDispatch();
+  // socket.on("response", (response) => {
+  //   console.log(response)
+  //   toastMessage('success', response);
+  //   return socket.off("response", (response));
+  // });
   const getData = async () => {
     dispatch(showLoading());
     const response = await get(API_URL + "/api/patient/get-all-approved-doctors", {

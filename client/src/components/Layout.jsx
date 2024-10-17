@@ -1,12 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../layout.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Badge } from "antd";
+import { socket } from "../utils/socket";
+import toastMessage from "../utils/toast";
 
 function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    (async () => {
+      await socket.on("response", (response) => {
+        console.log(response)
+        toastMessage('success', response);
+        return socket.off("response", (response));
+      });
+    })()
+  }, [])
 
   const navigate = useNavigate();
   const location = useLocation();

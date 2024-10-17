@@ -7,6 +7,7 @@ import moment from "moment";
 import { get, post } from "../../services/axios";
 import { API_URL } from "../../services/config";
 import toastMessage from "../../utils/toast";
+import { socket } from "../../utils/socket";
 
 function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -35,7 +36,7 @@ function DoctorAppointments() {
       if (response.data) {
         toastMessage('success', response.data.messages);
         getAppointmentsData();
-      }else {
+      } else {
         toastMessage('error', response?.data?.messages);
       }
     }).catch((error) => {

@@ -8,9 +8,6 @@ class Security {
 
     encrypt(value, _serialize = false) {
         const iv = API_ENCRYPT_IV_KEY;
-        console.log("API_KEY_ENC", API_KEY_ENC);
-        console.log("API_ENCRYPT_IV_KEY", API_ENCRYPT_IV_KEY);
-        
         const dataToEncrypt = _serialize ? serialize(JSON.stringify(value)) : JSON.stringify(value);
 
         const encrypted = CryptoJS.AES.encrypt(dataToEncrypt, CryptoJS.enc.Utf8.parse(API_KEY_ENC), {

@@ -45,7 +45,6 @@ export function patch(url, data = [], options = {}) {
 
 axios.interceptors.response.use(
     (response) => {
-        console.log(response, "response----------------")
         if (response.data.mac !== undefined) {
             response.data = new Security().decrypt(response.data);
         }
@@ -53,12 +52,11 @@ axios.interceptors.response.use(
     },
     (error) => {
         console.log("------------", error);
-
         if (error.response.status === 423) {
         }
         if (error.response.status === 401) {
             var userdata = localStorage.getItem('token');
-            console.log(userdata, "userData------------------");
+            // console.log(userdata, "userData------------------");
             if (userdata) {
                 toast(error.response.data.message);
             }
