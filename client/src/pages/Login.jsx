@@ -1,6 +1,5 @@
 import { Button, Form, Input } from "antd";
 import React from "react";
-import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { hideLoading, showLoading } from "../redux/alertsSlice";
@@ -18,6 +17,7 @@ function Login() {
       if (response) {
         toastMessage('success', response.data.messages);
         localStorage.setItem("token", response.data.data);
+        localStorage.setItem("id", response.data.id);
         navigate("/");
       } else {
         toastMessage('error', response?.data?.messages);
@@ -43,7 +43,6 @@ function Login() {
           <Form.Item label="Password" name="password" required>
             <Input placeholder="Password" type="password" />
           </Form.Item>
-
 
           <Button className="primary-button my-2 full-width-button" htmlType="submit">
             LOGIN

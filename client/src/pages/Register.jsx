@@ -18,7 +18,7 @@ function Register() {
         toastMessage('success', response.data.messages);
         navigate("/login");
       } else {
-        toastMessage('error',response.data.messages);
+        toastMessage('error', response.data.messages);
       }
     }).catch((error) => {
       dispatch(hideLoading());

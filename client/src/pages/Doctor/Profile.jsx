@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Layout from "../../components/Layout";
 import { useDispatch, useSelector } from "react-redux";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { useNavigate, useParams } from "react-router-dom";
@@ -62,11 +61,14 @@ function Profile() {
     getDoctorData();
   }, []);
   return (
-    <Layout>
+    <div>
+      {/* <Layout> */}
       <h1 className="page-title">Doctor Profile</h1>
       <hr />
       {doctor && <DoctorForm onFinish={onFinish} initivalValues={doctor} />}
-    </Layout>
+      {/* </Layout> */}
+    </div>
+
   );
 }
 

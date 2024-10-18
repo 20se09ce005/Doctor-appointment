@@ -1,7 +1,8 @@
 const Doctor = require("../doctor/model/doctorSchema");
 const Patient = require("../patient/model/patientSchema");
+const SupportTicket = require("./model/supportTicketSchema");
+const ApplyTicket = require("./model/applyTicketSchema");
 const common = require("../../utils/common");
-const { decryptData } = require("../../utils/decryption");
 
 const getalldoctors = async (req, res) => {
     try {
@@ -45,4 +46,96 @@ const changedoctoraccountstatus = async (req, res) => {
     }
 }
 
-module.exports = { getalldoctors, getallusers, changedoctoraccountstatus,  }
+const getAllSuportTicket = async (req, res) => {
+    try {
+        const tickets = await SupportTicket.find({});
+        return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: tickets }, 200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+const getOneSupportTicket = async (req, res) => {
+    try {
+        const id = req.query.id;
+        const ticket = await SupportTicket.findById({ _id: id });
+        return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: ticket }, 200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+const supportTicketCreate = async (req, res) => {
+    try {
+        const { title, message } = req.body;
+        const newticket = new SupportTicket({
+            title,
+            message,
+        });
+        await newticket.save();
+        return common.sendSuccess(req, res, { messages: "Patient registered successfully", data: newticket }, 201);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+const uploadPhoto = async (req, res, next) => {
+    try {
+        const fileNames = req.files.map(file => file.filename);
+        return common.sendSuccess(req, res, { files: fileNames });
+    } catch (error) {
+        console.log(error);
+        return common.sendError(req, res, { message: error.message }, 500);
+    }
+};
+
+const applyTicket = async (req, res) => {
+    try {
+        const userid = await Patient.findOne({ _id: req.body.userId });
+        const ticket = await SupportTicket.findOne({ _id: req.body.ticketid });
+
+        const { title, reason, photo } = req.body;
+
+        const newapplyticket = new ApplyTicket({
+            userId: userid._id,
+            supportTicketId: ticket,
+            title: title,
+            reason: reason,
+            photo: photo
+        });
+        await newapplyticket.save();
+        return common.sendSuccess(req, res, { messages: "Ticket applied successfully", data: newapplyticket }, 201)
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+const getAllApplyTicket = async (req, res) => {
+    try {
+        const tickets = await ApplyTicket.find({});
+        return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: tickets }, 200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+const getOneApplyTicket = async (req, res) => {
+    try {
+        const ticket = await ApplyTicket.findOne({ userId: req.body.userId });
+        console.log(ticket);
+        return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: ticket }, 200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+module.exports = {
+    getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
+    getOneSupportTicket, applyTicket, uploadPhoto, getAllApplyTicket, getOneApplyTicket
+}

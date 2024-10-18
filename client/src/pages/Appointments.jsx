@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import Layout from "../components/Layout";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import { Table } from "antd";
 import moment from "moment";
@@ -62,11 +61,11 @@ function Appointments() {
   useEffect(() => {
     getAppointmentsData();
   }, []);
-  return <Layout>
+  return <div>
     <h1 className="page-title">Appointments</h1>
     <hr />
     <Table columns={columns} dataSource={appointments} />
-  </Layout>
+  </div>
 }
 
 export default Appointments;

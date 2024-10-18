@@ -1,5 +1,4 @@
 import React from "react";
-import Layout from "../components/Layout";
 import { useDispatch, useSelector } from "react-redux";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import { useNavigate } from "react-router-dom";
@@ -40,12 +39,15 @@ function ApplyDoctor() {
   };
 
   return (
-    <Layout>
+    <div>
+      {/* <Layout> */}
       <h1 className="page-title">Apply Doctor</h1>
       <hr />
 
       <DoctorForm onFinish={onFinish} />
-    </Layout>
+      {/* </Layout> */}
+    </div>
+
   );
 }
 

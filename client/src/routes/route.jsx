@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Home from "../pages/Home";
 import ApplyDoctor from "../pages/ApplyDoctor";
+import ApplyTicket from "../pages/ApplyTicket";
 import Notifications from "../pages/Notifications";
 import Appointments from "../pages/Appointments";
 import BookAppointment from "../pages/BookAppointment";
@@ -13,6 +14,7 @@ import Profile from "../pages/Doctor/Profile";
 import DoctorAppointments from "../pages/Doctor/DoctorAppointments";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
+import Layout from "../components/Layout";
 
 const routes = [
     //admin
@@ -74,6 +76,11 @@ const routes = [
         component: <Notifications />
     },
     {
+        path: '/apply-ticket',
+        auth: true,
+        component: <ApplyTicket />
+    },
+    {
         path: '/login',
         auth: false,
         component: <Login />
@@ -92,7 +99,7 @@ const MainRoutes = () => {
                 if (info.auth === true) {
                     return (
                         <Route element={<ProtectedRoute></ProtectedRoute>} >
-                            <Route path={info.path} element={info.component} />
+                            <Route path={info.path} element={<Layout>{info.component}</Layout>}/>
                         </Route>
                     );
                 } else if (info.auth === false) {

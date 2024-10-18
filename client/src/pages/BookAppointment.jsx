@@ -1,6 +1,5 @@
 import { Button, Col, DatePicker, Row, TimePicker } from "antd";
 import React, { useEffect, useState } from "react";
-import Layout from "../components/Layout";
 import { useDispatch, useSelector } from "react-redux";
 import { showLoading, hideLoading } from "../redux/alertsSlice";
 import { useNavigate, useParams } from "react-router-dom";
@@ -80,7 +79,7 @@ function BookAppointment() {
     getDoctorData();
   }, []);
   return (
-    <Layout>
+    <div>
       {doctor && (
         <div>
           <h1 className="page-title">
@@ -154,7 +153,8 @@ function BookAppointment() {
           </Row>
         </div>
       )}
-    </Layout>
+    </div>
+
   );
 }
 

@@ -2,7 +2,6 @@ import { Tabs } from "antd";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
 import { hideLoading, showLoading } from "../redux/alertsSlice";
 import { setUser } from "../redux/userSlice";
 import { API_URL } from "../services/config";
@@ -19,7 +18,6 @@ function Notifications() {
     }).then((response) => {
       dispatch(hideLoading());
       if (response.data.data) {
-        console.log(response, "response Notifications---------------------");
         toastMessage('success', response.data.messages);
         dispatch(setUser(response.data.data));
       } else {
@@ -56,7 +54,7 @@ function Notifications() {
     })
   }
   return (
-    <Layout>
+    <div>
       <h1 className="page-title">Notifications</h1>
       <hr />
 
@@ -83,7 +81,7 @@ function Notifications() {
           ))}
         </Tabs.TabPane>
       </Tabs>
-    </Layout>
+    </div>
   );
 }
 

@@ -11,14 +11,16 @@ function Layout({ children }) {
   const { user } = useSelector((state) => state.user);
 
   useEffect(() => {
-    (async () => {
-      await socket.on("response", (response) => {
-        console.log(response)
-        toastMessage('success', response);
-        return socket.off("response", (response));
-      });
-    })()
+    const id= localStorage.getItem("id");
+    const handlemesssage = (response) => {
+      toastMessage(`success`, response );
+    }
+    socket.on(`response ${id}`, handlemesssage)
+    return () => {
+      socket.off(`response ${id}`, handlemesssage);
+    }
   }, [])
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,6 +39,11 @@ function Layout({ children }) {
       name: "Apply Doctor",
       path: "/apply-doctor",
       icon: "ri-hospital-line",
+    },
+    {
+      name: "Apply Ticket",
+      path: "/apply-ticket",
+      icon: "ri-coupon-2-fill",
     }
   ];
 
@@ -73,6 +80,11 @@ function Layout({ children }) {
       name: "Doctors",
       path: "/admin/doctorslist",
       icon: "ri-user-star-line",
+    },
+    {
+      name: "Upport Tickets",
+      path: "/admin/support-tickets",
+      icon: "ri-coupon-2-fill",
     },
     {
       name: "Profile",
