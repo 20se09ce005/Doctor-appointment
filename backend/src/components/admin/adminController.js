@@ -3,6 +3,8 @@ const Patient = require("../patient/model/patientSchema");
 const SupportTicket = require("./model/supportTicketSchema");
 const ApplyTicket = require("./model/applyTicketSchema");
 const common = require("../../utils/common");
+const multer = require('multer');
+const upload = require("../../utils/upload")
 
 const getalldoctors = async (req, res) => {
     try {
@@ -92,6 +94,33 @@ const uploadPhoto = async (req, res, next) => {
     }
 };
 
+
+const uploadMultipleImage = async (req, res, next) => {
+
+    const image_ = multer({
+        storage: upload.storageConfig,
+        fileFilter: upload.fileFilterConfig
+    }).array("images");
+
+    image_(req, res, async (err) => {
+
+        if (err) return common.sendError(req, res, { message: "IMAGE_NOT_UPLOADED" }, 400)
+
+        if (!req.files || req.files.length === 0) return common.sendError(req, res, { message: "IMAGE_NOT_FOUND" }, 400)
+
+        const image_name = req.files;
+
+        var arr = [];
+
+        image_name.map((element) => {
+            arr.push(element.filename);
+        })
+
+        return common.sendSuccess(req, res, arr);
+    }
+    );
+}
+
 const applyTicket = async (req, res) => {
     try {
         const userid = await Patient.findOne({ _id: req.body.userId });
@@ -137,5 +166,5 @@ const getOneApplyTicket = async (req, res) => {
 
 module.exports = {
     getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
-    getOneSupportTicket, applyTicket, uploadPhoto, getAllApplyTicket, getOneApplyTicket
+    getOneSupportTicket, applyTicket, uploadPhoto, getAllApplyTicket, getOneApplyTicket, uploadMultipleImage
 }

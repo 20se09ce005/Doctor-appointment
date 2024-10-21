@@ -56,7 +56,8 @@ function BookAppointment() {
   const bookNow = async () => {
     setIsAvailable(false);
     dispatch(showLoading());
-    const response = await post(API_URL + "/api/patient/book-appointment", { doctorId: params.doctorId, userId: user._id, doctorInfo: doctor, userInfo: user, date: date, time: time, },
+    const response = await post(API_URL + "/api/patient/book-appointment",
+      { doctorId: params.doctorId, userId: user._id, doctorInfo: doctor, userInfo: user, date: date, time: time, },
     ).then((response) => {
       dispatch(hideLoading());
       if (response.data) {

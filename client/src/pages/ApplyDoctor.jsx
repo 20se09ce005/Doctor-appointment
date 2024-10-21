@@ -40,12 +40,9 @@ function ApplyDoctor() {
 
   return (
     <div>
-      {/* <Layout> */}
       <h1 className="page-title">Apply Doctor</h1>
       <hr />
-
       <DoctorForm onFinish={onFinish} />
-      {/* </Layout> */}
     </div>
 
   );

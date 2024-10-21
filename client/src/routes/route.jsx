@@ -8,6 +8,7 @@ import ApplyTicket from "../pages/ApplyTicket";
 import Notifications from "../pages/Notifications";
 import Appointments from "../pages/Appointments";
 import BookAppointment from "../pages/BookAppointment";
+import TicketForm from "../pages/TicketForm";
 import Userslist from "../pages/Admin/Userslist";
 import DoctorsList from "../pages/Admin/DoctorsList";
 import Profile from "../pages/Doctor/Profile";
@@ -71,6 +72,11 @@ const routes = [
         component: <BookAppointment />
     },
     {
+        path: '/apply-ticket-form',
+        auth: true,
+        component: <TicketForm />
+    },
+    {
         path: '/notifications',
         auth: true,
         component: <Notifications />
@@ -99,7 +105,7 @@ const MainRoutes = () => {
                 if (info.auth === true) {
                     return (
                         <Route element={<ProtectedRoute></ProtectedRoute>} >
-                            <Route path={info.path} element={<Layout>{info.component}</Layout>}/>
+                            <Route path={info.path} element={<Layout>{info.component}</Layout>} />
                         </Route>
                     );
                 } else if (info.auth === false) {
