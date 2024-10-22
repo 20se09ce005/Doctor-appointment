@@ -4,12 +4,12 @@ const applyTicketSchema = new mongoose.Schema(
     {
         supportTicketId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref:"SupportTicket",
+            ref: "SupportTicket",
             required: true
         },
         userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref:"patient",
+            ref: "patient",
             required: true
         },
         title: {
@@ -20,9 +20,9 @@ const applyTicketSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        photo:{
-            type:String,
-            required:true
+        photo: {
+            type: [String],
+            required: true
         },
         status: {
             type: Number,
