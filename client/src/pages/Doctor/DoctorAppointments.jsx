@@ -6,7 +6,6 @@ import moment from "moment";
 import { get, post } from "../../services/axios";
 import { API_URL } from "../../services/config";
 import toastMessage from "../../utils/toast";
-import { socket } from "../../utils/socket";
 
 function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -106,11 +105,9 @@ function DoctorAppointments() {
   }, []);
   return (
     <div>
-      {/* <Layout> */}
       <h1 className="page-header">Appointments</h1>
       <hr />
       <Table columns={columns} dataSource={appointments} />
-      {/* </Layout> */}
     </div>
 
   );

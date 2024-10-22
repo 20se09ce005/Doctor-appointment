@@ -5,6 +5,7 @@ import Register from "../pages/Register";
 import Home from "../pages/Home";
 import ApplyDoctor from "../pages/ApplyDoctor";
 import ApplyTicket from "../pages/ApplyTicket";
+import ComplainTickets from "../pages/ComplainTickets";
 import Notifications from "../pages/Notifications";
 import Appointments from "../pages/Appointments";
 import BookAppointment from "../pages/BookAppointment";
@@ -85,6 +86,10 @@ const routes = [
         path: '/apply-ticket',
         auth: true,
         component: <ApplyTicket />
+    },{
+        path: '/complain-tickets',
+        auth: true,
+        component: <ComplainTickets />
     },
     {
         path: '/login',

@@ -10,7 +10,7 @@ function Ticket({ ticket }) {
 
     return (
         <div className="card p-2 cursor-pointer">
-            <h1 className="card-title">{ticket.title}</h1>
+            <h3 className="card-title">{ticket.title}</h3>
             <hr />
             <p className="mb-2"><b>Details: </b>{ticket.message}</p>
 
