@@ -33,7 +33,7 @@ const ApplyTicket = () => {
 
             <Row gutter={20}>
                 {tickets.map((ticket) => (
-                    <Col span={8} xs={24} sm={24} lg={8}>
+                    <Col className="mb-3" span={8} xs={24} sm={24} lg={8}>
                         <Ticket ticket={ticket} />
                     </Col>
                 ))}

@@ -12,10 +12,10 @@ function Ticket({ ticket }) {
         <div className="card p-2 cursor-pointer">
             <h1 className="card-title">{ticket.title}</h1>
             <hr />
-            <p><b>Details: </b>{ticket.message}</p>
+            <p className="mb-2"><b>Details: </b>{ticket.message}</p>
 
             <button 
-                className="primary-button"
+                className="primary-button px-3"
                 onClick={handleApplyClick}
             >
                 Apply Ticket

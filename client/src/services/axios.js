@@ -6,9 +6,15 @@ function AxiosMiddleware(method, url, data, options) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
     axios.defaults.headers.common['env'] = "test";
 
-    if (data) {
+    const contentType = options?.headers?.['Content-Type'] === 'multipart/form-data';
+
+    if (data && !contentType) {
         data = new Security().encrypt(data);
     }
+
+    // if (data) {
+    //     data = new Security().encrypt(data);
+    // }
 
     switch (method) {
         case 'get':
@@ -51,7 +57,7 @@ axios.interceptors.response.use(
         return response
     },
     (error) => {
-        console.log("------------", error);
+        // console.log("------------", error);
         if (error.response.status === 423) {
         }
         if (error.response.status === 401) {

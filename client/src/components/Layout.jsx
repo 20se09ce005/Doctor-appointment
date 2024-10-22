@@ -44,6 +44,11 @@ function Layout({ children }) {
       name: "Apply Ticket",
       path: "/apply-ticket",
       icon: "ri-coupon-2-fill",
+    },
+    {
+      name: "Complain Tickets",
+      path: "/complain-tickets",
+      icon: "ri-coupon-fill",
     }
   ];
 

@@ -30,7 +30,7 @@ function Home() {
     <div>
       <Row gutter={20}>
         {doctors.map((doctor) => (
-          <Col span={8} xs={24} sm={24} lg={8}>
+          <Col className="mb-3" span={8} xs={24} sm={24} lg={8}>
             <Doctor doctor={doctor} />
           </Col>
         ))}
