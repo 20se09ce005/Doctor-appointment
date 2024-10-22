@@ -6,7 +6,7 @@ const adminValidation = require("../components/admin/adminValidation");
 const decryptionProcess = require("../utils/common");
 
 const { getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
-    getOneSupportTicket, applyTicket, uploadPhoto, getAllApplyTicket, getOneApplyTicket,
+    getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket,
     uploadMultipleImage, }
     = require("../components/admin/adminController");
 

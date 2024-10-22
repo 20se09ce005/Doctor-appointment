@@ -85,17 +85,6 @@ const supportTicketCreate = async (req, res) => {
     }
 }
 
-const uploadPhoto = async (req, res, next) => {
-    try {
-        const fileNames = req.files.map(file => file.filename);
-        return common.sendSuccess(req, res, { files: fileNames });
-    } catch (error) {
-        console.log(error);
-        return common.sendError(req, res, { message: error.message }, 500);
-    }
-};
-
-
 const uploadMultipleImage = async (req, res) => {
     const imageUpload = multer({
         storage: storageConfig,
@@ -161,5 +150,5 @@ const getOneApplyTicket = async (req, res) => {
 
 module.exports = {
     getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
-    getOneSupportTicket, applyTicket, uploadPhoto, getAllApplyTicket, getOneApplyTicket, uploadMultipleImage
+    getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket, uploadMultipleImage
 }
