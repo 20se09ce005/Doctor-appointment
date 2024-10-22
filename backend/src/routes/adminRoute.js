@@ -7,7 +7,9 @@ const decryptionProcess = require("../utils/common");
 
 const { getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
     getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket,
-    uploadMultipleImage, }
+    uploadMultipleImage,
+    sendmessage,
+    getMessages, }
     = require("../components/admin/adminController");
 
 router.get("/get-all-doctors", authMiddleware, getalldoctors);
@@ -22,5 +24,8 @@ router.post("/uploadMultipleImage", uploadMultipleImage);
 router.post("/apply-ticket", decryptionProcess.decryptionProcess, authMiddleware, applyTicket);
 router.get("/get-All-Apply-Ticket", authMiddleware, getAllApplyTicket);
 router.get("/get-One-Apply-Ticket", authMiddleware, getOneApplyTicket);
+
+router.post("/sendmessage", decryptionProcess.decryptionProcess, authMiddleware, sendmessage);
+router.get("/getMessages",getMessages);
 
 module.exports = router;

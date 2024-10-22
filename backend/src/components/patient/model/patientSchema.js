@@ -31,6 +31,9 @@ const patientSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    role:{
+      type: String
+    }
   },
   {
     timestamps: true,

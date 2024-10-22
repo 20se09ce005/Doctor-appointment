@@ -5,7 +5,9 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const patientValidation = require("../components/patient/patientValidation");
 const decryptionProcess = require("../utils/common");
 const { userregistration, login, getuserinfobyid, applydoctoraccount, markallnotificationsasseen, deleteallnotifications,
-    getallapproveddoctors, bookappointment, checkbookingavilability, getappointmentsbyuserid, DecryptData }
+    getallapproveddoctors, bookappointment, checkbookingavilability, getappointmentsbyuserid, DecryptData,
+    getMessages,
+    sendmessage }
     = require("../components/patient/patientController");
 
 router.post("/register", decryptionProcess.decryptionProcess, patientValidation.patientValadation, userregistration);
@@ -19,5 +21,6 @@ router.post("/book-appointment", decryptionProcess.decryptionProcess, patientVal
 router.post("/check-booking-avilability", decryptionProcess.decryptionProcess, patientValidation.checkbookingavilability, authMiddleware, checkbookingavilability);
 router.get("/get-appointments-by-user-id", authMiddleware, getappointmentsbyuserid);
 router.post("/DecryptData", DecryptData);
-
-module.exports = router;
+router.post("/sendmessage", decryptionProcess.decryptionProcess, authMiddleware, sendmessage);
+router.get("/getMessages", getMessages);
+    module.exports = router;

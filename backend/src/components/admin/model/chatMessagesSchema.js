@@ -1,18 +1,18 @@
 const mongoose = require("mongoose");
 
-const applyTicketSchema = new mongoose.Schema(
+const chatMessagesSchema = new mongoose.Schema(
     {
         ticketId: {
             type: mongoose.Schema.Types.ObjectId,
             ref:"ApplyTicket",
             required: true
         },
-        adminId: {
+        senderId: {
             type: mongoose.Schema.Types.ObjectId,
             ref:"patient",
             required: true
         },
-        userId: {
+        reciverId: {
             type: mongoose.Schema.Types.ObjectId,
             ref:"patient",
             required: true
@@ -20,6 +20,14 @@ const applyTicketSchema = new mongoose.Schema(
         type: {
             type: Number,
             required: true
+        },
+        date:{
+            type:String,
+            required:true
+        },
+        time:{
+            type:String,
+            required:true
         },
         messages: {
             type: String,
@@ -35,5 +43,5 @@ const applyTicketSchema = new mongoose.Schema(
     }
 );
 
-const applyTicketModel = mongoose.model("ApplyTicket", applyTicketSchema);
-module.exports = applyTicketModel;
+const chatMessagesModel = mongoose.model("ChatMessages", chatMessagesSchema);
+module.exports = chatMessagesModel;

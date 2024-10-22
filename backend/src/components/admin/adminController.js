@@ -2,10 +2,13 @@ const Doctor = require("../doctor/model/doctorSchema");
 const Patient = require("../patient/model/patientSchema");
 const SupportTicket = require("./model/supportTicketSchema");
 const ApplyTicket = require("./model/applyTicketSchema");
+const ChatMessages = require("./model/chatMessagesSchema");
 const common = require("../../utils/common");
 const multer = require("multer");
 const upload = require("../../utils/upload");
+const moment = require("moment");
 const { storageConfig, fileFilterConfig } = require("../../utils/upload");
+const { default: mongoose } = require("mongoose");
 
 const getalldoctors = async (req, res) => {
     try {
@@ -148,7 +151,45 @@ const getOneApplyTicket = async (req, res) => {
     }
 }
 
+const sendmessage = async(req,res) => {
+    try {
+        const adminId = await Patient.findOne({_id: req.body.userId});
+        const message = req.body.message;
+        if(message){
+            return common.sendError(req,res,{message:"Enter Message"},422);
+        }
+        const date = Date.now();
+        const formatDate = moment(date).format("DD-MM-YYYY");
+        const formatTime = moment(date).format("hh:mm A");
+        const ticket = await ApplyTicket.findOne({_id:new mongoose.Types.ObjectId(req.body.ticketId)});
+        const newMessage = new ChatMessages({
+            time:formatTime,
+            date:formatDate,
+            messages:message,
+            senderId:adminId,
+            receiverId:ticket.userId,
+            ticketId:ticket
+        });
+        await newMessage.save();
+        return common.sendSuccess(req,res,{messages:"Message sent successfully"},200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+const getMessages = async(req,res) => {
+    try {
+        const messageList = await ChatMessages.find({ticketId:req.query.ticketId});
+        return res.json(messageList);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req,res,{message:error.message},500);
+    }
+}
+
 module.exports = {
     getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
-    getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket, uploadMultipleImage
+    getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket, uploadMultipleImage, sendmessage,
+    getMessages
 }

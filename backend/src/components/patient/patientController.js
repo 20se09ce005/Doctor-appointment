@@ -6,6 +6,8 @@ const JWT_SECRET = config.get("JWT_SECRET");
 const Patient = require("./model/patientSchema");
 const Doctor = require("../doctor/model/doctorSchema");
 const Appointment = require("./model/appointmentSchema");
+const ChatMessages = require("../admin/model/chatMessagesSchema");
+const ApplyTicket = require("../admin/model/applyTicketSchema");
 const common = require("../../utils/common");
 const { decryptData } = require("../../utils/decryption");
 
@@ -43,7 +45,7 @@ const login = async (req, res) => {
         } else {
             const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
             console.log(token);
-            return common.sendSuccess(req, res, { messages: "Login successful", data: token,id:user._id });
+            return common.sendSuccess(req, res, { messages: "Login successful", data: token, id: user._id });
         }
     } catch (error) {
         console.log(error)
@@ -210,8 +212,45 @@ const DecryptData = (req, res, next) => {
     }
 }
 
+const sendmessage = async (req, res) => {
+    try {
+        const userId = await Patient.findOne({ _id: req.body.userId });
+        const message = req.body.message;
+        if (message) {
+            return common.sendError(req, res, { message: "Enter Message" }, 422);
+        }
+        const date = Date.now();
+        const formatDate = moment(date).format("DD-MM-YYYY");
+        const formatTime = moment(date).format("hh:mm A");
+        const ticket = await ApplyTicket.findOne({ _id: new mongoose.Types.ObjectId(req.body.ticketId) });
+        const adminId = await Patient.findOne({ role: "super-admin" });
+        const newMessage = new ChatMessages({
+            time: formatTime,
+            date: formatDate,
+            messages: message,
+            senderId: userId,
+            receiverId: adminId._id,
+            ticketId: ticket
+        });
+        await newMessage.save();
+        return common.sendSuccess(req, res, { messages: "Message sent successfully" }, 200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+const getMessages = async(req,res) => {
+    try {
+        const messageList = await ChatMessages.find({ticketId:req.query.ticketId});
+        return res.json(messageList);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req,res,{message:error.message},500);
+    }
+}
+
 module.exports = {
     userregistration, login, getuserinfobyid, applydoctoraccount, markallnotificationsasseen,
     deleteallnotifications, getallapproveddoctors, bookappointment, checkbookingavilability,
-    getappointmentsbyuserid, DecryptData,
+    getappointmentsbyuserid, DecryptData, sendmessage, getMessages
 }
