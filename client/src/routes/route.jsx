@@ -14,6 +14,7 @@ import Userslist from "../pages/Admin/Userslist";
 import DoctorsList from "../pages/Admin/DoctorsList";
 import Profile from "../pages/Doctor/Profile";
 import PatientChat from "../pages/Patient/PatientChat";
+import AdminChat from "../pages/Admin/AdminChat";
 import SupportTickets from "../pages/Admin/SupportTickets";
 import DoctorAppointments from "../pages/Doctor/DoctorAppointments";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -39,6 +40,12 @@ const routes = [
         layout: 'admin',
         auth: true,
         component: <SupportTickets />
+    },
+    {
+        path: '/Admin-Chat',
+        layout: 'admin',
+        auth: true,
+        component: <AdminChat />
     },
 
     //doctor

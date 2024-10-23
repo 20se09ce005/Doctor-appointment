@@ -1,30 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { Row, Col, Card, Input, Button, Typography } from "antd";
-import { useSelector } from "react-redux";
-import { socket } from "../../utils/socket";
-import toastMessage from "../../utils/toast";
+import { get } from "../../services/axios";
+import { useDispatch } from "react-redux";
+import { API_URL } from "../../services/config";
+import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { SendOutlined, SmileOutlined, AudioOutlined } from "@ant-design/icons";
 
 const { Paragraph, Title } = Typography;
 
 function ChatTicketPage() {
-    const { user } = useSelector((state) => state.user);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+ 
+    const [selectedTicket, setSelectedTicket] = useState(null);  
+    const dispatch = useDispatch();
+
+    const getData = async () => {
+        dispatch(showLoading());
+        try {
+            const response = await get(`${API_URL}/api/admin/get-All-User-Apply-Ticket`);
+            dispatch(hideLoading());
+            if (response.data && response.data.data) {
+                setSelectedTicket(response.data.data);
+                setSelectedTicket(response.data.data[0]); 
+            }
+        } catch (error) {
+            dispatch(hideLoading());
+            console.error("Error fetching tickets:", error);
+        }
+    };
 
     useEffect(() => {
-        const id = localStorage.getItem("id");
-
-        const handleMessage = (response) => {
-            setMessages((prev) => [...prev, response]);
-            toastMessage("success", response);
-        };
-
-        socket.on(`response ${id}`, handleMessage);
-
-        return () => {
-            socket.off(`response ${id}`, handleMessage);
-        };
+        getData();
     }, []);
 
     const images = ["https://via.placeholder.com/150"];
@@ -37,38 +44,47 @@ function ChatTicketPage() {
     };
 
     return (
-        <Row style={{ height: "" }}>
+        <Row style={{ height: "100vh" }}>
             <Col span={8} style={{ padding: "8px" }}>
                 <Card
                     title="Complaint Ticket Info"
                     bordered
                     style={{ height: "100%", overflowY: "auto" }}
                 >
-                    <Paragraph>
-                        <b>Ticket ID:</b> 12345
-                    </Paragraph>
-                    <Paragraph>
-                        <b>Details:</b> This is a description of the complaint ticket...
-                    </Paragraph>
+                    {selectedTicket ? (
+                        <>
+                            <Paragraph>
+                                <b>Ticket ID:</b> {selectedTicket._id}
+                            </Paragraph>
+                            <Paragraph>
+                                <b>Title:</b> {selectedTicket.title}
+                            </Paragraph>
+                            <Paragraph>
+                                <b>Details:</b> {selectedTicket.reason}
+                            </Paragraph>
 
-                    <div style={{ marginTop: "16px" }}>
-                        <Title level={5}>Attached Images</Title>
-                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                            {images.map((src, index) => (
-                                <img
-                                    key={index}
-                                    src={src}
-                                    alt={`attachment-${index}`}
-                                    style={{
-                                        width: "100px",
-                                        height: "100px",
-                                        objectFit: "cover",
-                                        borderRadius: "8px",
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </div>
+                            <div style={{ marginTop: "16px" }}>
+                                <Title level={5}>Attached Images</Title>
+                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                    {images.map((src, index) => (
+                                        <img
+                                            key={index}
+                                            src={src}
+                                            alt={`attachment-${index}`}
+                                            style={{
+                                                width: "100px",
+                                                height: "100px",
+                                                objectFit: "cover",
+                                                borderRadius: "8px",
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <Paragraph>No ticket selected</Paragraph>
+                    )}
                 </Card>
             </Col>
 
@@ -79,7 +95,6 @@ function ChatTicketPage() {
                     bordered
                     style={{ flex: 1, display: "flex", flexDirection: "column" }}
                 >
-
                     <div
                         style={{
                             flex: 1,
@@ -110,7 +125,6 @@ function ChatTicketPage() {
                             </div>
                         ))}
                     </div>
-
 
                     <div
                         style={{

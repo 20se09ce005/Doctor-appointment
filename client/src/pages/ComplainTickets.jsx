@@ -11,7 +11,7 @@ function ComplainTickets() {
     const dispatch = useDispatch();
     const getData = async () => {
         dispatch(showLoading());
-        const response = await get(API_URL + "/api/admin/get-All-Apply-Ticket", {
+        const response = await get(API_URL + "/api/admin/get-All-User-Apply-Ticket", {
         }).then((response) => {
             dispatch(hideLoading())
             if (response.data) {

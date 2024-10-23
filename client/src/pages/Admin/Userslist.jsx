@@ -53,11 +53,9 @@ function Userslist() {
 
   return (
     <div>
-      {/* <Layout> */}
       <h1 className="page-header">Users List</h1>
       <hr />
       <Table columns={columns} dataSource={users} />
-      {/* </Layout> */}
     </div>
 
   );

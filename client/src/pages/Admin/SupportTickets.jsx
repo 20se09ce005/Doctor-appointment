@@ -54,7 +54,7 @@ function SupportTickets() {
     return (
         <div className="support-tickets-container">
             <div className="ticket-column">
-                <h4>Pending Tickets</h4>
+                <h5>Pending Tickets</h5>
                 <Row gutter={20}>
                     {pendingTickets.map((ticket) => (
                         <Col className="mb-3" span={24} key={ticket._id}>
@@ -71,7 +71,7 @@ function SupportTickets() {
             </div>
 
             <div className="ticket-column">
-                <h4>Accepted Tickets</h4>
+                <h5>Accepted Tickets</h5>
                 <Row gutter={20}>
                     {acceptedTickets.map((ticket) => (
                         <Col className="mb-3" span={24} key={ticket._id}>
@@ -82,7 +82,7 @@ function SupportTickets() {
             </div>
 
             <div className="ticket-column">
-                <h4>Rejected Tickets</h4>
+                <h5>Rejected Tickets</h5>
                 <Row gutter={20}>
                     {rejectedTickets.map((ticket) => (
                         <Col className="mb-3" span={24} key={ticket._id}>
