@@ -87,7 +87,7 @@ function Layout({ children }) {
       icon: "ri-user-star-line",
     },
     {
-      name: "Upport Tickets",
+      name: "Support Tickets",
       path: "/admin/support-tickets",
       icon: "ri-coupon-2-fill",
     },

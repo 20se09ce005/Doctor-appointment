@@ -97,11 +97,9 @@ function DoctorsList() {
   ];
   return (
     <div>
-      {/* <Layout> */}
       <h1 className="page-header">Doctors List</h1>
       <hr />
       <Table columns={columns} dataSource={doctors} />
-      {/* </Layout> */}
     </div>
 
   );

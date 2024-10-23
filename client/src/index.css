@@ -124,3 +124,54 @@ p{
   margin-left: -40px;
   border-bottom-left-radius: 10px;
 }
+
+/* ---------------------------------------------- */
+
+.support-tickets-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+.ticket-column {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+}
+
+
+.button-group {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+.primary-button, .secondary-button {
+  padding: 8px 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.primary-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.secondary-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #45a049;
+}
+
+.secondary-button:hover {
+  background-color: #d32f2f;
+}

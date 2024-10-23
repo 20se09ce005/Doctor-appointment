@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 function ComplainTicketsCard({ ticket }) {
     const navigate = useNavigate();
     const handleApplyClick = () => {
-        navigate('/Chat', { state: { ticket } });
+        navigate('/Patient-Chat', { state: { ticket } });
     };
 
     return (

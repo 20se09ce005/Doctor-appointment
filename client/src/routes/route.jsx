@@ -13,6 +13,8 @@ import TicketForm from "../pages/TicketForm";
 import Userslist from "../pages/Admin/Userslist";
 import DoctorsList from "../pages/Admin/DoctorsList";
 import Profile from "../pages/Doctor/Profile";
+import PatientChat from "../pages/Patient/PatientChat";
+import SupportTickets from "../pages/Admin/SupportTickets";
 import DoctorAppointments from "../pages/Doctor/DoctorAppointments";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
@@ -31,6 +33,12 @@ const routes = [
         layout: 'admin',
         auth: true,
         component: <DoctorsList />
+    },
+    {
+        path: '/admin/support-tickets',
+        layout: 'admin',
+        auth: true,
+        component: <SupportTickets />
     },
 
     //doctor
@@ -59,6 +67,12 @@ const routes = [
         layout: 'user',
         auth: true,
         component: <ApplyDoctor />
+    },
+    {
+        path: '/Patient-Chat',
+        layout: 'user',
+        auth: true,
+        component: <PatientChat />
     },
 
     //common
