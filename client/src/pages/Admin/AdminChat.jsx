@@ -3,6 +3,7 @@ import { Row, Col, Card, Input, Button, Typography } from "antd";
 import { get } from "../../services/axios";
 import { useDispatch } from "react-redux";
 import { API_URL } from "../../services/config";
+import { socket } from "../../utils/socket";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { SendOutlined, SmileOutlined, AudioOutlined } from "@ant-design/icons";
 
@@ -35,60 +36,53 @@ function AdminChat() {
         getData();
     }, []);
 
-    const images = ["https://via.placeholder.com/150"];
-
     const handleSendMessage = () => {
         if (newMessage.trim()) {
             setMessages([...messages, `You: ${newMessage}`]);
             setNewMessage("");
         }
     };
-
     return (
         <div>
             <Row style={{ height: "" }}>
-            <Col span={8} style={{ padding: "8px" }}>
-                <Card
-                    title="Complaint Ticket Info"
-                    bordered
-                    style={{ height: "100%", overflowY: "auto" }}
-                >
-                    {selectedTicket ? (
-                        <>
-                            <Paragraph>
-                                <b>Ticket ID:</b> {selectedTicket._id}
-                            </Paragraph>
-                            <Paragraph>
-                                <b>Title:</b> {selectedTicket.title}
-                            </Paragraph>
-                            <Paragraph>
-                                <b>Details:</b> {selectedTicket.reason}
-                            </Paragraph>
+                <Col span={8} style={{ padding: "8px" }}>
+                    <Card
+                        title="Complaint Ticket Info"
+                        bordered
+                        style={{ height: "100%", overflowY: "auto" }}
+                    >
+                        {selectedTicket ? (
+                            <>
+                                <Paragraph>
+                                    <b>Ticket ID:</b> {selectedTicket._id}
+                                </Paragraph>
+                                <Paragraph>
+                                    <b>Title:</b> {selectedTicket.title}
+                                </Paragraph>
+                                <Paragraph>
+                                    <b>Details:</b> {selectedTicket.reason}
+                                </Paragraph>
 
-                            <div style={{ marginTop: "16px" }}>
-                                <Title level={5}>Attached Images</Title>
-                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                                    {images.map((src, index) => (
+                                <div style={{ marginTop: "16px" }}>
+                                    <Title level={5}>Attached Images</Title>
+                                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                                         <img
-                                            key={index}
-                                            src={src}
-                                            alt={`attachment-${index}`}
+                                            src={API_URL + `/uploads/images/${selectedTicket.photo}`}
                                             style={{
-                                                width: "100px",
-                                                height: "100px",
-                                                objectFit: "cover",
-                                                borderRadius: "8px",
+                                                width: "275px",
+                                                height: "156px",
+                                                // objectFit: "cover",
+                                                // borderRadius: "8px",
                                             }}
                                         />
-                                    ))}
+                                    </div>
                                 </div>
-                            </div>
-                        </>
-                    ) : (
-                        <Paragraph>No ticket selected</Paragraph>
-                    )}
-                </Card>
-            </Col>
+                            </>
+                        ) : (
+                            <Paragraph>No ticket selected</Paragraph>
+                        )}
+                    </Card>
+                </Col>
 
 
                 <Col span={16} style={{ padding: "8px", display: "flex", flexDirection: "column" }}>
