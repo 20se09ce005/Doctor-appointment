@@ -21,6 +21,6 @@ router.post("/book-appointment", decryptionProcess.decryptionProcess, patientVal
 router.post("/check-booking-avilability", decryptionProcess.decryptionProcess, patientValidation.checkbookingavilability, authMiddleware, checkbookingavilability);
 router.get("/get-appointments-by-user-id", authMiddleware, getappointmentsbyuserid);
 router.post("/DecryptData", DecryptData);
-router.post("/sendmessage", decryptionProcess.decryptionProcess, authMiddleware, sendmessage);
-router.get("/getMessages", getMessages);
+router.post("/send-message", decryptionProcess.decryptionProcess, authMiddleware, sendmessage);
+router.get("/get-Messages", getMessages);
     module.exports = router;

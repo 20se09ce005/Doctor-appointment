@@ -27,30 +27,16 @@ const adminRoute = require("./routes/adminRoute");
 
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 const server = http.createServer(app);
-
 const io = new Server(server, {
     cors: {
         origin: ['http://localhost:3000'],
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        methods: ['GET', 'POST'],
         credentials: true,
     },
 });
-
-// io.on("connection", (socket) => {
-//     console.log("User connected ", socket.id);
-//     socket.on("response", (response) => {
-//         // console.log(response);
-//         io.emit("response", response);
-//     });
-// });
-
-// app.use(cors({
-//     origin: ['http://localhost:3000'],
-//     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-//     credentials: true,
-// }));
 
 app.use("/api/patient", patientRoute);
 app.use("/api/doctor", doctorRoute);

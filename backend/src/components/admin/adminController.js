@@ -7,6 +7,7 @@ const common = require("../../utils/common");
 const multer = require("multer");
 const upload = require("../../utils/upload");
 const moment = require("moment");
+const io = require("../../index");
 const { storageConfig, fileFilterConfig } = require("../../utils/upload");
 const { default: mongoose } = require("mongoose");
 
@@ -140,10 +141,20 @@ const getAllApplyTicket = async (req, res) => {
     }
 }
 
+const getAllUserApplyTicket = async (req, res) => {
+    try {
+        const tickets = await ApplyTicket.find({ userId: req.body.userId });
+        console.log(123)
+        return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: tickets }, 200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
 const getOneApplyTicket = async (req, res) => {
     try {
         const ticket = await ApplyTicket.findOne({ userId: req.body.userId });
-        console.log(ticket);
         return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: ticket }, 200);
     } catch (error) {
         console.log(error)
@@ -151,45 +162,77 @@ const getOneApplyTicket = async (req, res) => {
     }
 }
 
-const sendmessage = async(req,res) => {
+const ticketResponse = async (req, res) => {
     try {
-        const adminId = await Patient.findOne({_id: req.body.userId});
-        const message = req.body.message;
-        if(message){
-            return common.sendError(req,res,{message:"Enter Message"},422);
+        const adminId = await Patient.findOne({ _id: req.body.userId });
+        const response = req.body.response;
+        const reply = req.body.reply;
+        if (!reply) {
+            return common.sendError(req, res, { message: "Enter reasone" }, 422);
         }
-        const date = Date.now();
-        const formatDate = moment(date).format("DD-MM-YYYY");
-        const formatTime = moment(date).format("hh:mm A");
-        const ticket = await ApplyTicket.findOne({_id:new mongoose.Types.ObjectId(req.body.ticketId)});
-        const newMessage = new ChatMessages({
-            time:formatTime,
-            date:formatDate,
-            messages:message,
-            senderId:adminId,
-            receiverId:ticket.userId,
-            ticketId:ticket
-        });
-        await newMessage.save();
-        return common.sendSuccess(req,res,{messages:"Message sent successfully"},200);
+        const ticketId = req.body.ticketId;
+        if (response == "Accept") {
+            await ApplyTicket.updateOne({ _id: new mongoose.Types.ObjectId(ticketId) }, { $set: { status: 1, response: reply } });
+            return common.sendSuccess(req, res, { message: "Support Ticket Accept Successfully" });
+        }
+        if (response == "Reject") {
+            await ApplyTicket.updateOne({ _id: new mongoose.Types.ObjectId(ticketId) }, { $set: { status: 2, response: reply } });
+            return common.sendSuccess(req, res, { message: "Support Ticket Reject Successfully" });
+        }
+        return common.sendError(req, res, { message: "Enter Response" }, 422);
     } catch (error) {
         console.log(error)
         return common.sendError(req, res, { messages: error.message }, 500);
     }
 }
 
-const getMessages = async(req,res) => {
+const sendmessage = async (req, res) => {
     try {
-        const messageList = await ChatMessages.find({ticketId:req.query.ticketId});
+        const adminId = await Patient.findOne({ _id: req.body.userId });
+        if (!adminId) {
+            return common.sendError(req, res, { message: "Admin not found" }, 404);
+        }
+        const message = req.body.message;
+
+        if (!message) {
+            return common.sendError(req, res, { message: "Enter Message" }, 422);
+        }
+        const date = Date.now();
+        const formatDate = moment(date).format("DD-MM-YYYY");
+        const formatTime = moment(date).format("hh:mm A");
+        const ticket = await ApplyTicket.findOne({ _id: new mongoose.Types.ObjectId(req.body.ticketId) });
+        const newMessage = new ChatMessages({
+            time: formatTime,
+            date: formatDate,
+            messages: message,
+            senderId: adminId._id,
+            receiverId: ticket.userId,
+            ticketId: ticket._id
+        });
+        console.log(newMessage, '--------------------');
+        await newMessage.save();
+        io.io.emit("response", message)
+        return common.sendSuccess(req, res, { messages: "Message sent successfully" }, 200);
+    } catch (error) {
+        console.log(error)
+        return common.sendError(req, res, { messages: error.message }, 500);
+    }
+}
+
+const getMessages = async (req, res) => {
+    try {
+        console.log(req.query.ticketId);
+
+        const messageList = await ChatMessages.find({ ticketId: new mongoose.Types.ObjectId(req.query.ticketId) });
         return res.json(messageList);
     } catch (error) {
         console.log(error)
-        return common.sendError(req,res,{message:error.message},500);
+        return common.sendError(req, res, { message: error.message }, 500);
     }
 }
 
 module.exports = {
     getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
     getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket, uploadMultipleImage, sendmessage,
-    getMessages
+    getMessages, ticketResponse, getAllUserApplyTicket
 }

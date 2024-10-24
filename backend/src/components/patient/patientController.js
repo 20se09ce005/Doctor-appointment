@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const config = require("config");
+const mongoose = require("mongoose")
 const JWT_SECRET = config.get("JWT_SECRET");
 const Patient = require("./model/patientSchema");
 const Doctor = require("../doctor/model/doctorSchema");
@@ -9,6 +10,7 @@ const Appointment = require("./model/appointmentSchema");
 const ChatMessages = require("../admin/model/chatMessagesSchema");
 const ApplyTicket = require("../admin/model/applyTicketSchema");
 const common = require("../../utils/common");
+const io = require("../../index");
 const { decryptData } = require("../../utils/decryption");
 
 const userregistration = async (req, res) => {
@@ -215,8 +217,11 @@ const DecryptData = (req, res, next) => {
 const sendmessage = async (req, res) => {
     try {
         const userId = await Patient.findOne({ _id: req.body.userId });
+        if (!userId) {
+            return common.sendError(req, res, { messages: "User not found" }, 404);
+        }
         const message = req.body.message;
-        if (message) {
+        if (!message) {
             return common.sendError(req, res, { message: "Enter Message" }, 422);
         }
         const date = Date.now();
@@ -233,19 +238,23 @@ const sendmessage = async (req, res) => {
             ticketId: ticket
         });
         await newMessage.save();
+        io.io.emit("response", message)
         return common.sendSuccess(req, res, { messages: "Message sent successfully" }, 200);
     } catch (error) {
         console.log(error)
         return common.sendError(req, res, { messages: error.message }, 500);
     }
 }
-const getMessages = async(req,res) => {
+
+const getMessages = async (req, res) => {
     try {
-        const messageList = await ChatMessages.find({ticketId:req.query.ticketId});
+
+        const messageList = await ChatMessages.find({ ticketId: new mongoose.Types.ObjectId(req.query.ticketId) });
+
         return res.json(messageList);
     } catch (error) {
         console.log(error)
-        return common.sendError(req,res,{message:error.message},500);
+        return common.sendError(req, res, { message: error.message }, 500);
     }
 }
 

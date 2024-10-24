@@ -12,14 +12,13 @@ const chatMessagesSchema = new mongoose.Schema(
             ref:"patient",
             required: true
         },
-        reciverId: {
+        receiverId: {
             type: mongoose.Schema.Types.ObjectId,
             ref:"patient",
             required: true
         },
         type: {
-            type: Number,
-            required: true
+            type: Number
         },
         date:{
             type:String,

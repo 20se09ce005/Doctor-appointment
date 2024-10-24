@@ -27,6 +27,9 @@ const applyTicketSchema = new mongoose.Schema(
         status: {
             type: Number,
             default: 0
+        },
+        response: {
+            type: String,
         }
     },
     {
