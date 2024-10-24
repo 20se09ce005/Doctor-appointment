@@ -154,7 +154,8 @@ const getAllUserApplyTicket = async (req, res) => {
 
 const getOneApplyTicket = async (req, res) => {
     try {
-        const ticket = await ApplyTicket.findOne({ userId: req.body.userId });
+        
+        const ticket = await ApplyTicket.findOne({ _id: new mongoose.Types.ObjectId(req.query.ticketId) });
         return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: ticket }, 200);
     } catch (error) {
         console.log(error)
@@ -167,11 +168,9 @@ const ticketResponse = async (req, res) => {
         const adminId = await Patient.findOne({ _id: req.body.userId });
         const response = req.body.response;
         const reply = req.body.reply;
-        if (!reply) {
-            return common.sendError(req, res, { message: "Enter reasone" }, 422);
-        }
         const ticketId = req.body.ticketId;
         if (response == "Accept") {
+            console.log(response)
             await ApplyTicket.updateOne({ _id: new mongoose.Types.ObjectId(ticketId) }, { $set: { status: 1, response: reply } });
             return common.sendSuccess(req, res, { message: "Support Ticket Accept Successfully" });
         }
@@ -193,7 +192,6 @@ const sendmessage = async (req, res) => {
             return common.sendError(req, res, { message: "Admin not found" }, 404);
         }
         const message = req.body.message;
-
         if (!message) {
             return common.sendError(req, res, { message: "Enter Message" }, 422);
         }
@@ -209,7 +207,6 @@ const sendmessage = async (req, res) => {
             receiverId: ticket.userId,
             ticketId: ticket._id
         });
-        console.log(newMessage, '--------------------');
         await newMessage.save();
         io.io.emit("response", message)
         return common.sendSuccess(req, res, { messages: "Message sent successfully" }, 200);
@@ -221,8 +218,6 @@ const sendmessage = async (req, res) => {
 
 const getMessages = async (req, res) => {
     try {
-        console.log(req.query.ticketId);
-
         const messageList = await ChatMessages.find({ ticketId: new mongoose.Types.ObjectId(req.query.ticketId) });
         return res.json(messageList);
     } catch (error) {

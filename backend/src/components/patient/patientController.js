@@ -248,9 +248,7 @@ const sendmessage = async (req, res) => {
 
 const getMessages = async (req, res) => {
     try {
-
         const messageList = await ChatMessages.find({ ticketId: new mongoose.Types.ObjectId(req.query.ticketId) });
-
         return res.json(messageList);
     } catch (error) {
         console.log(error)

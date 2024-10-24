@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Input, Button, Typography } from "antd";
+import { Row, Col, Card, Input, Button, Typography, Modal, Upload} from "antd";
 import { get, post } from "../../services/axios";
 import { useDispatch } from "react-redux";
 import { API_URL } from "../../services/config";
 import { socket } from "../../utils/socket";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { useLocation } from "react-router-dom";
+import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
 
 const { Paragraph, Title } = Typography;
 
 function PatientChat() {
     const location = useLocation();
-
+    const [isImageModalVisible, setIsImageModalVisible] = useState(false);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [selectedTicket, setSelectedTicket] = useState(null);
+    const [uploadedImage, setUploadedImage] = useState(null);
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
-
-
+    const userId = localStorage.getItem("id");
 
     const fetchData = async () => {
         dispatch(showLoading());
@@ -37,12 +38,13 @@ function PatientChat() {
     const handleSendMessage = async () => {
         if (newMessage.trim() && ticketId) {
             const messageData = { userId: "adminId", ticketId, message: newMessage };
-            console.log(newMessage)
+            console.log(newMessage);
             try {
                 await post(`${API_URL}/api/patient/send-message`, messageData);
                 socket.emit("sendMessage", messageData);
                 console.log("sending message via socket:", messageData);
                 setNewMessage("");
+                setUploadedImage(null);
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert("Failed to send message. Please try again.");
@@ -58,13 +60,25 @@ function PatientChat() {
             console.error("Error fetching messages:", error);
         }
     };
+
+    const handleImageUpload = (info) => {
+        if (info.file.status === "done") {
+            setUploadedImage(info.file.response.url);
+        }
+    };
+
     socket.on("response", (message) => {
         fetchMessages();
-    })
+    });
+
     useEffect(() => {
         fetchData();
         fetchMessages();
     }, []);
+
+    const isEditable = selectedTicket?.status === 0;
+    const openImageModal = () => setIsImageModalVisible(true);
+    const closeImageModal = () => setIsImageModalVisible(false);
 
     return (
         <Row>
@@ -80,7 +94,8 @@ function PatientChat() {
                                 <img
                                     src={`${API_URL}/uploads/images/${selectedTicket.photo}`}
                                     alt="Ticket"
-                                    style={{ width: "275px", height: "156px" }}
+                                    style={{ width: "275px", height: "156px", cursor: "pointer" }}
+                                    onClick={openImageModal}
                                 />
                             </div>
                         </>
@@ -92,22 +107,94 @@ function PatientChat() {
 
             <Col span={16} style={{ padding: "8px" }}>
                 <Card title="Chat" bordered>
-                    <div>
+                    <div className="chat-container" style={{ maxHeight: "300px", overflowY: "auto" }}>
                         {messages.map((msg, index) => (
-                            <div key={index}>
-                                <p>{msg.messages}</p>
+                            <div
+                                key={index}
+                                style={{
+                                    display: "flex",
+                                    justifyContent: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    margin: "8px 0",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        background: msg.senderId === userId ? "#1890ff" : "#f0f0f0",
+                                        color: msg.senderId === userId ? "white" : "black",
+                                        padding: "8px 12px",
+                                        borderRadius: "8px",
+                                        maxWidth: "70%",
+                                    }}
+                                >
+                                    {msg.messages}
+                                </div>
                             </div>
                         ))}
                     </div>
-                    <Input
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onPressEnter={handleSendMessage}
-                        placeholder="Type a message"
-                    />
-                    <Button onClick={handleSendMessage}>Send</Button>
+
+                    {isEditable && (
+                        <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
+                            <Upload
+                                action={`${API_URL}/api/upload`}
+                                showUploadList={false}
+                                onChange={handleImageUpload}
+                            >
+                                <Button
+                                    icon={<PlusOutlined />}
+                                    style={{ marginRight: "8px" }}
+                                />
+                            </Upload>
+
+                            <Input
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                onPressEnter={handleSendMessage}
+                                placeholder="Type a message"
+                                style={{ flex: 1 }}
+                            />
+
+                            <Button
+                                type="primary"
+                                onClick={handleSendMessage}
+                                style={{ marginLeft: "8px" }}
+                            >
+                                Send
+                            </Button>
+                        </div>
+                    )}
                 </Card>
             </Col>
+
+            <Modal
+                visible={isImageModalVisible}
+                footer={null}
+                closable={false}
+                onCancel={closeImageModal}
+                centered
+                bodyStyle={{ padding: 0, textAlign: "center" }}
+            >
+                <div style={{ position: "relative" }}>
+                    <CloseOutlined
+                        onClick={closeImageModal}
+                        style={{
+                            position: "absolute",
+                            top: 10,
+                            right: 10,
+                            fontSize: "24px",
+                            color: "white",
+                            cursor: "pointer",
+                            background: "rgba(0, 0, 0, 0.6)",
+                            borderRadius: "50%",
+                            padding: "4px",
+                        }}
+                    />
+                    <img
+                        src={`${API_URL}/uploads/images/${selectedTicket?.photo}`}
+                        alt="Ticket"
+                        style={{ width: "100%", height: "auto" }}
+                    />
+                </div>
+            </Modal>
         </Row>
     );
 }

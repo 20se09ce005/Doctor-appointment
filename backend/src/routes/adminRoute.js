@@ -24,7 +24,7 @@ router.get("/get-All-Apply-Ticket", authMiddleware, getAllApplyTicket);
 router.get("/get-One-Apply-Ticket", authMiddleware, getOneApplyTicket);
 router.get("/get-All-User-Apply-Ticket", authMiddleware, getAllUserApplyTicket);
 
-router.post("/ticketResponse", decryptionProcess.decryptionProcess, authMiddleware, ticketResponse)
+router.post("/ticket-response", decryptionProcess.decryptionProcess, authMiddleware, ticketResponse)
 router.post("/send-message", decryptionProcess.decryptionProcess, authMiddleware, sendmessage);
 router.get("/get-Messages", getMessages);
 
