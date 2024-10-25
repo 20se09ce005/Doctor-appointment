@@ -40,7 +40,6 @@ function TicketForm() {
                 toastMessage('success', uploadRes.data.messages || 'Images uploaded successfully');
                 console.log('Uploaded Images:', uploadRes.data.imagePaths);
 
-                console.log()
                 return post(`${API_URL}/api/admin/apply-ticket`, {...data,userId: user._id,ticketid:location.state.ticket._id,photo: uploadRes.data.imagePaths, });
             })
             .then((ticketRes) => {

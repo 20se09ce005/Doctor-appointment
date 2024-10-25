@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Row, Col, Card, Input, Button, Typography, Modal, Upload } from "antd";
 import { get, post } from "../../services/axios";
 import { useDispatch } from "react-redux";
@@ -11,15 +11,22 @@ import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
 const { Paragraph, Title } = Typography;
 
 function AdminChat() {
+    const chatContainerRef = useRef(null);
     const location = useLocation();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [isImageModalVisible, setIsImageModalVisible] = useState(false);
-    const [uploadedImage, setUploadedImage] = useState(null); // Track uploaded image
+    const [uploadedImage, setUploadedImage] = useState(null);
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
+
+    const scrollToBottom = () => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    };
 
     const fetchData = async () => {
         dispatch(showLoading());
@@ -40,13 +47,14 @@ function AdminChat() {
     const handleSendMessage = async () => {
         if (newMessage.trim() && ticketId) {
             const messageData = { userId: "adminId", ticketId, message: newMessage };
-            if (uploadedImage) messageData.image = uploadedImage; // Attach image if available
+            if (uploadedImage) messageData.image = uploadedImage;
 
             try {
                 await post(`${API_URL}/api/admin/send-message`, messageData);
                 socket.emit("sendMessage", messageData);
                 setNewMessage("");
-                setUploadedImage(null); 
+                setUploadedImage(null);
+                fetchMessages(); // Fetch new messages after sending
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert("Failed to send message. Please try again.");
@@ -60,6 +68,7 @@ function AdminChat() {
                 `${API_URL}/api/admin/get-Messages?ticketId=${location.state.ticket._id}`
             );
             setMessages(response.data);
+            scrollToBottom(); // Scroll to the latest message
         } catch (error) {
             console.error("Error fetching messages:", error);
         }
@@ -67,7 +76,7 @@ function AdminChat() {
 
     const handleImageUpload = (info) => {
         if (info.file.status === "done") {
-            setUploadedImage(info.file.response.url); 
+            setUploadedImage(info.file.response.url);
         }
     };
 
@@ -79,6 +88,13 @@ function AdminChat() {
         fetchData();
         fetchMessages();
     }, []);
+
+    const formatTime = (time) => {
+        const [hours, minutes] = time.split(':');
+        // const period = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12; // Convert 0 to 12
+        return `${formattedHours}:${minutes}`;
+    };
 
     const isEditable = selectedTicket?.status === 0;
 
@@ -112,14 +128,20 @@ function AdminChat() {
 
             <Col span={16} style={{ padding: "8px" }}>
                 <Card title="Chat" bordered>
-                    <div className="chat-container" style={{ maxHeight: "300px", overflowY: "auto" }}>
+                    <div
+                        ref={chatContainerRef}
+                        className="chat-container"
+                        style={{ maxHeight: "300px", overflowY: "auto" }}
+                    >
                         {messages.map((msg, index) => (
                             <div
                                 key={index}
                                 style={{
                                     display: "flex",
-                                    justifyContent: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    flexDirection: "column",
+                                    alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
                                     margin: "8px 0",
+                                    paddingRight: "8px",
                                 }}
                             >
                                 <div
@@ -132,6 +154,16 @@ function AdminChat() {
                                     }}
                                 >
                                     {msg.messages}
+                                </div>
+
+                                <div
+                                    style={{
+                                        fontSize: "12px",
+                                        color: "darkgray",
+                                        marginTop: "4px",
+                                    }}
+                                >
+                                    {formatTime(msg.time)}
                                 </div>
                             </div>
                         ))}
@@ -182,15 +214,8 @@ function AdminChat() {
                     <CloseOutlined
                         onClick={closeImageModal}
                         style={{
-                            position: "absolute",
-                            top: 10,
-                            right: 10,
-                            fontSize: "24px",
-                            color: "white",
-                            cursor: "pointer",
-                            background: "rgba(0, 0, 0, 0.6)",
-                            borderRadius: "50%",
-                            padding: "4px",
+                            position: "absolute", top: 10, right: 10, fontSize: "24px", color: "white",
+                            cursor: "pointer", background: "rgba(0, 0, 0, 0.6)", borderRadius: "50%", padding: "4px",
                         }}
                     />
                     <img

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Row, Col, Card, Input, Button, Typography, Modal, Upload} from "antd";
+import React, { useEffect, useState, useRef } from "react";
+import { Row, Col, Card, Input, Button, Typography, Modal, Upload } from "antd";
 import { get, post } from "../../services/axios";
 import { useDispatch } from "react-redux";
 import { API_URL } from "../../services/config";
@@ -11,6 +11,7 @@ import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
 const { Paragraph, Title } = Typography;
 
 function PatientChat() {
+    const chatContainerRef = useRef(null);
     const location = useLocation();
     const [isImageModalVisible, setIsImageModalVisible] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -20,6 +21,12 @@ function PatientChat() {
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
+
+    const scrollToBottom = () => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    };
 
     const fetchData = async () => {
         dispatch(showLoading());
@@ -45,6 +52,7 @@ function PatientChat() {
                 console.log("sending message via socket:", messageData);
                 setNewMessage("");
                 setUploadedImage(null);
+                fetchMessages();
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert("Failed to send message. Please try again.");
@@ -56,6 +64,7 @@ function PatientChat() {
         try {
             const response = await get(`${API_URL}/api/patient/get-Messages?ticketId=${location.state.ticket._id}`);
             setMessages(response.data);
+            scrollToBottom();
         } catch (error) {
             console.error("Error fetching messages:", error);
         }
@@ -65,6 +74,13 @@ function PatientChat() {
         if (info.file.status === "done") {
             setUploadedImage(info.file.response.url);
         }
+    };
+
+    const formatTime = (time) => {
+        const [hours, minutes] = time.split(':');
+        // const period = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12; // Convert 0 to 12
+        return `${formattedHours}:${minutes}`;
     };
 
     socket.on("response", (message) => {
@@ -107,14 +123,20 @@ function PatientChat() {
 
             <Col span={16} style={{ padding: "8px" }}>
                 <Card title="Chat" bordered>
-                    <div className="chat-container" style={{ maxHeight: "300px", overflowY: "auto" }}>
+                    <div
+                        ref={chatContainerRef}
+                        className="chat-container"
+                        style={{ maxHeight: "300px", overflowY: "auto" }}
+                    >
                         {messages.map((msg, index) => (
                             <div
                                 key={index}
                                 style={{
                                     display: "flex",
-                                    justifyContent: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    flexDirection: "column",
+                                    alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
                                     margin: "8px 0",
+                                    paddingRight: "8px",
                                 }}
                             >
                                 <div
@@ -127,6 +149,16 @@ function PatientChat() {
                                     }}
                                 >
                                     {msg.messages}
+                                </div>
+
+                                <div
+                                    style={{
+                                        fontSize: "12px",
+                                        color: "darkgray",
+                                        marginTop: "4px",
+                                    }}
+                                >
+                                    {formatTime(msg.time)}
                                 </div>
                             </div>
                         ))}

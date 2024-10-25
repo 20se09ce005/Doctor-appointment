@@ -216,6 +216,43 @@ const sendmessage = async (req, res) => {
     }
 }
 
+// const sendmessage = async (req, res) => {
+//     try {
+//         const adminId = await Patient.findOne({ _id: req.body.userId });
+//         if (!adminId) {
+//             return common.sendError(req, res, { message: "Admin not found" }, 404);
+//         }
+//         const message = req.body.message || "";
+//         const images = req.body.images || []; // Array of images
+
+//         if (!message && images.length === 0) {
+//             return common.sendError(req, res, { message: "Enter a message or upload an image" }, 422);
+//         }
+
+//         const date = Date.now();
+//         const formatDate = moment(date).format("DD-MM-YYYY");
+//         const formatTime = moment(date).format("hh:mm A");
+//         const ticket = await ApplyTicket.findOne({ _id: new mongoose.Types.ObjectId(req.body.ticketId) });
+
+//         const newMessage = new ChatMessages({
+//             time: formatTime,
+//             date: formatDate,
+//             messages: message,
+//             senderId: adminId._id,
+//             receiverId: ticket.userId,
+//             ticketId: ticket._id,
+//             images: images // Save images in the message
+//         });
+
+//         await newMessage.save();
+//         io.io.emit("response", newMessage); // Send new message through socket
+//         return common.sendSuccess(req, res, { messages: "Message sent successfully" }, 200);
+//     } catch (error) {
+//         console.log(error);
+//         return common.sendError(req, res, { messages: error.message }, 500);
+//     }
+// };
+
 const getMessages = async (req, res) => {
     try {
         const messageList = await ChatMessages.find({ ticketId: new mongoose.Types.ObjectId(req.query.ticketId) });
