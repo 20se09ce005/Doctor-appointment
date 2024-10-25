@@ -144,7 +144,6 @@ const getAllApplyTicket = async (req, res) => {
 const getAllUserApplyTicket = async (req, res) => {
     try {
         const tickets = await ApplyTicket.find({ userId: req.body.userId });
-        console.log(123)
         return common.sendSuccess(req, res, { messages: "Tickets fetched successfully", data: tickets }, 200);
     } catch (error) {
         console.log(error)
