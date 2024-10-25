@@ -22,12 +22,6 @@ function PatientChat() {
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
 
-    const scrollToBottom = () => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    };
-
     const fetchData = async () => {
         dispatch(showLoading());
         try {
@@ -60,6 +54,18 @@ function PatientChat() {
         }
     };
 
+    const scrollToBottom = () => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    };
+
+    useEffect(() => {
+        if (messages.length > 0) {
+            scrollToBottom();
+        }
+    }, [messages])
+
     const fetchMessages = async () => {
         try {
             const response = await get(`${API_URL}/api/patient/get-Messages?ticketId=${location.state.ticket._id}`);
@@ -78,8 +84,7 @@ function PatientChat() {
 
     const formatTime = (time) => {
         const [hours, minutes] = time.split(':');
-        // const period = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 || 12; // Convert 0 to 12
+        const formattedHours = hours % 12 || 12;
         return `${formattedHours}:${minutes}`;
     };
 
@@ -151,13 +156,7 @@ function PatientChat() {
                                     {msg.messages}
                                 </div>
 
-                                <div
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "darkgray",
-                                        marginTop: "4px",
-                                    }}
-                                >
+                                <div style={{ fontSize: "12px", color: "darkgray", marginTop: "4px", }}>
                                     {formatTime(msg.time)}
                                 </div>
                             </div>
@@ -166,15 +165,8 @@ function PatientChat() {
 
                     {isEditable && (
                         <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
-                            <Upload
-                                action={`${API_URL}/api/upload`}
-                                showUploadList={false}
-                                onChange={handleImageUpload}
-                            >
-                                <Button
-                                    icon={<PlusOutlined />}
-                                    style={{ marginRight: "8px" }}
-                                />
+                            <Upload action={`${API_URL}/api/upload`} showUploadList={false} onChange={handleImageUpload}>
+                                <Button icon={<PlusOutlined />} style={{ marginRight: "8px" }} />
                             </Upload>
 
                             <Input
@@ -185,11 +177,7 @@ function PatientChat() {
                                 style={{ flex: 1 }}
                             />
 
-                            <Button
-                                type="primary"
-                                onClick={handleSendMessage}
-                                style={{ marginLeft: "8px" }}
-                            >
+                            <Button type="primary" onClick={handleSendMessage} style={{ marginLeft: "8px" }}>
                                 Send
                             </Button>
                         </div>
@@ -209,22 +197,12 @@ function PatientChat() {
                     <CloseOutlined
                         onClick={closeImageModal}
                         style={{
-                            position: "absolute",
-                            top: 10,
-                            right: 10,
-                            fontSize: "24px",
-                            color: "white",
-                            cursor: "pointer",
-                            background: "rgba(0, 0, 0, 0.6)",
-                            borderRadius: "50%",
-                            padding: "4px",
-                        }}
-                    />
-                    <img
-                        src={`${API_URL}/uploads/images/${selectedTicket?.photo}`}
-                        alt="Ticket"
-                        style={{ width: "100%", height: "auto" }}
-                    />
+                            position: "absolute", top: 10, right: 10, fontSize: "15px", color: "white",
+                            cursor: "pointer", background: "rgba(0, 0, 0, 0.6)", borderRadius: "50%", padding: "4px",
+                        }} />
+
+                    <img src={`${API_URL}/uploads/images/${selectedTicket?.photo}`}
+                        alt="Ticket" style={{ width: "100%", height: "auto" }} />
                 </div>
             </Modal>
         </Row>

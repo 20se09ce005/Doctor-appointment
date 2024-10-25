@@ -22,12 +22,6 @@ function AdminChat() {
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
 
-    const scrollToBottom = () => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    };
-
     const fetchData = async () => {
         dispatch(showLoading());
         try {
@@ -54,7 +48,7 @@ function AdminChat() {
                 socket.emit("sendMessage", messageData);
                 setNewMessage("");
                 setUploadedImage(null);
-                fetchMessages(); // Fetch new messages after sending
+                fetchMessages();
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert("Failed to send message. Please try again.");
@@ -62,13 +56,25 @@ function AdminChat() {
         }
     };
 
+    const scrollToBottom = () => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    };
+
+    useEffect(() => {
+        if (messages.length > 0) {
+            scrollToBottom();
+        }
+    }, [messages])
+    
     const fetchMessages = async () => {
         try {
             const response = await get(
                 `${API_URL}/api/admin/get-Messages?ticketId=${location.state.ticket._id}`
             );
             setMessages(response.data);
-            scrollToBottom(); // Scroll to the latest message
+            scrollToBottom();
         } catch (error) {
             console.error("Error fetching messages:", error);
         }
@@ -91,8 +97,7 @@ function AdminChat() {
 
     const formatTime = (time) => {
         const [hours, minutes] = time.split(':');
-        // const period = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 || 12; // Convert 0 to 12
+        const formattedHours = hours % 12 || 12;
         return `${formattedHours}:${minutes}`;
     };
 
@@ -214,7 +219,7 @@ function AdminChat() {
                     <CloseOutlined
                         onClick={closeImageModal}
                         style={{
-                            position: "absolute", top: 10, right: 10, fontSize: "24px", color: "white",
+                            position: "absolute", top: 10, right: 10, fontSize: "15px", color: "white",
                             cursor: "pointer", background: "rgba(0, 0, 0, 0.6)", borderRadius: "50%", padding: "4px",
                         }}
                     />
