@@ -18,29 +18,31 @@ function AdminChat() {
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [isImageModalVisible, setIsImageModalVisible] = useState(false);
     const [uploadedImage, setUploadedImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
 
     const handleImageUpload = async ({ file, onSuccess, onError }) => {
+        setIsUploading(true);
         const formData = new FormData();
         formData.append("image", file);
         try {
-            const response = await post(`${API_URL}api/admin/upload`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+            const response = await post(`${API_URL}/api/admin/upload`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            const data = await response.json();
-            console.log(data);
-            if (response.ok) {
-                setUploadedImage(data.url);
+            if (response.status === 200) {
+                const data = response.data;
+                setUploadedImage(data);
                 onSuccess("Image uploaded successfully");
             } else {
-                console.error("Upload failed:", data.message);
-                onError(new Error(data.message || "Upload failed"));
+                onError(new Error("Upload failed"));
             }
         } catch (error) {
             console.error("Error uploading image:", error);
             onError(error);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -68,13 +70,14 @@ function AdminChat() {
         }
     };
 
-    socket.on("response", () => {
-        fetchMessages();
-    });
+    socket.on("response", () => { fetchMessages(); });
 
     useEffect(() => {
-        fetchData();
-        fetchMessages();
+        const initializeChat = async () => {
+            await fetchData();
+            fetchMessages();
+        };
+        initializeChat();
     }, []);
 
     const formatTime = (time) => {
@@ -107,6 +110,10 @@ function AdminChat() {
 
 
     const handleSendMessage = async () => {
+        if (isUploading) {
+            alert("Please wait, image is still uploading...");
+            return;
+        }
         if ((newMessage.trim() || uploadedImage) && ticketId) {
             const messageData = {
                 userId: "adminId",
@@ -115,12 +122,19 @@ function AdminChat() {
                 image: uploadedImage,
             };
 
+            console.log("Sending Message Data:", messageData);
+
             try {
-                await post(`${API_URL}/api/admin/send-message`, messageData);
-                socket.emit("sendMessage", messageData);
-                setNewMessage("");
-                setUploadedImage(null);
-                fetchMessages();
+                const response = await post(`${API_URL}/api/admin/send-message`, messageData);
+
+                if (response.status === 200) {
+                    socket.emit("sendMessage", messageData);
+                    setNewMessage("");
+                    setUploadedImage(null);
+                    fetchMessages();
+                } else {
+                    handleError(new Error("Failed to send message"));
+                }
             } catch (error) {
                 handleError(error);
             }
@@ -233,8 +247,9 @@ function AdminChat() {
                                 type="primary"
                                 onClick={handleSendMessage}
                                 style={{ marginLeft: "8px" }}
+                                disabled={isUploading}
                             >
-                                Send
+                                {isUploading ? "Uploading..." : "Send"}
                             </Button>
                         </div>
                     )}

@@ -13,11 +13,12 @@ const { Paragraph, Title } = Typography;
 function PatientChat() {
     const chatContainerRef = useRef(null);
     const location = useLocation();
-    const [isImageModalVisible, setIsImageModalVisible] = useState(false);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [selectedTicket, setSelectedTicket] = useState(null);
+    const [isImageModalVisible, setIsImageModalVisible] = useState(false);
     const [uploadedImage, setUploadedImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -29,7 +30,7 @@ function PatientChat() {
             dispatch(hideLoading());
             if (response.data && response.data.data) {
                 console.log(response);
-                
+
                 setSelectedTicket(response.data.data[0]);
             }
         } catch (error) {
@@ -39,19 +40,33 @@ function PatientChat() {
     };
 
     const handleSendMessage = async () => {
-        if (newMessage.trim() && ticketId) {
-            const messageData = { userId: "adminId", ticketId, message: newMessage };
-            console.log(newMessage);
+        if (isUploading) {
+            alert("Please wait, image is still uploading...");
+            return;
+        }
+        if ((newMessage.trim() || uploadedImage) && ticketId) {
+            const messageData = {
+                userId: "adminId",
+                ticketId,
+                message: newMessage,
+                image: uploadedImage,
+            };
+
+            console.log("Sending Message Data:", messageData);
+
             try {
-                await post(`${API_URL}/api/patient/send-message`, messageData);
-                socket.emit("sendMessage", messageData);
-                console.log("sending message via socket:", messageData);
-                setNewMessage("");
-                setUploadedImage(null);
-                fetchMessages();
+                const response = await post(`${API_URL}/api/admin/send-message`, messageData);
+
+                if (response.status === 200) {
+                    socket.emit("sendMessage", messageData);
+                    setNewMessage("");
+                    setUploadedImage(null);
+                    fetchMessages();
+                } else {
+                    handleError(new Error("Failed to send message"));
+                }
             } catch (error) {
-                console.error("Error sending message:", error);
-                alert("Failed to send message. Please try again.");
+                handleError(error);
             }
         }
     };
@@ -78,9 +93,26 @@ function PatientChat() {
         }
     };
 
-    const handleImageUpload = (info) => {
-        if (info.file.status === "done") {
-            setUploadedImage(info.file.response.url);
+    const handleImageUpload = async ({ file, onSuccess, onError }) => {
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("image", file);
+        try {
+            const response = await post(`${API_URL}/api/admin/upload`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            if (response.status === 200) {
+                const data = response.data;
+                setUploadedImage(data);
+                onSuccess("Image uploaded successfully");
+            } else {
+                onError(new Error("Upload failed"));
+            }
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            onError(error);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -95,11 +127,18 @@ function PatientChat() {
     });
 
     useEffect(() => {
-        fetchData();
-        fetchMessages();
+        const initializeChat = async () => {
+            await fetchData();
+            fetchMessages();
+        };
+        initializeChat();
     }, []);
 
     const isEditable = selectedTicket?.status === 0;
+    const handleError = (error) => {
+        console.error(error);
+        alert("An error occurred. Please try again.");
+    };
     const openImageModal = () => setIsImageModalVisible(true);
     const closeImageModal = () => setIsImageModalVisible(false);
 
@@ -156,6 +195,18 @@ function PatientChat() {
                                     }}
                                 >
                                     {msg.messages}
+                                    {msg.image && (
+                                        <img
+                                            src={`${API_URL}/uploads/images/${msg.image}`}
+                                            alt="chat-img"
+                                            style={{
+                                                width: "100px",
+                                                height: "100px",
+                                                marginTop: "8px",
+                                                borderRadius: "5px",
+                                            }}
+                                        />
+                                    )}
                                 </div>
 
                                 <div style={{ fontSize: "12px", color: "darkgray", marginTop: "4px", }}>
@@ -167,7 +218,12 @@ function PatientChat() {
 
                     {isEditable && (
                         <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
-                            <Upload action={`${API_URL}/api/upload`} showUploadList={false} onChange={handleImageUpload}>
+                            <Upload
+                                name="image"
+                                listType="picture"
+                                showUploadList={true}
+                                customRequest={handleImageUpload}
+                            >
                                 <Button icon={<PlusOutlined />} style={{ marginRight: "8px" }} />
                             </Upload>
 
@@ -179,8 +235,13 @@ function PatientChat() {
                                 style={{ flex: 1 }}
                             />
 
-                            <Button type="primary" onClick={handleSendMessage} style={{ marginLeft: "8px" }}>
-                                Send
+                            <Button
+                                type="primary"
+                                onClick={handleSendMessage}
+                                style={{ marginLeft: "8px" }}
+                                disabled={isUploading}
+                            >
+                                {isUploading ? "Uploading..." : "Send"}
                             </Button>
                         </div>
                     )}
@@ -203,8 +264,11 @@ function PatientChat() {
                             cursor: "pointer", background: "rgba(0, 0, 0, 0.6)", borderRadius: "50%", padding: "4px",
                         }} />
 
-                    <img src={`${API_URL}/uploads/images/${selectedTicket?.photo}`}
-                        alt="Ticket" style={{ width: "100%", height: "auto" }} />
+                    <img
+                        src={`${API_URL}/uploads/images/${selectedTicket?.photo[0]}`}
+                        alt="Ticket"
+                        style={{ width: "100%", height: "auto" }}
+                    />
                 </div>
             </Modal>
         </Row>
