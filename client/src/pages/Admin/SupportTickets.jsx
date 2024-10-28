@@ -14,7 +14,7 @@ function SupportTickets() {
     const [modalVisible, setModalVisible] = useState(false);
     const [actionType, setActionType] = useState("");
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // Initialize navigation
+    const navigate = useNavigate();
 
     const getData = async () => {
         dispatch(showLoading());

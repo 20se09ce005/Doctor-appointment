@@ -118,7 +118,7 @@ function PatientChat() {
             setIsUploading(false);
         }
     };
-    
+
     // const formatTime = (time) => {
     //     const [hours, minutes] = time.split(':');
     //     const formattedHours = hours % 12 || 12;
@@ -234,34 +234,36 @@ function PatientChat() {
                         ))}
                     </div>
 
-                    <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
-                        <Upload
-                            name="image"
-                            listType="picture"
-                            fileList={fileList}
-                            onChange={({ fileList }) => setFileList(fileList)}
-                            customRequest={handleImageUpload}
-                        >
-                            <Button icon={<PlusOutlined />} style={{ marginRight: "8px" }} />
-                        </Upload>
+                    {selectedTicket?.status === 0 && (
+                        <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
+                            <Upload
+                                name="image"
+                                listType="picture"
+                                fileList={fileList}
+                                onChange={({ fileList }) => setFileList(fileList)}
+                                customRequest={handleImageUpload}
+                            >
+                                <Button icon={<PlusOutlined />} style={{ marginRight: "8px" }} />
+                            </Upload>
 
-                        <Input
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            onPressEnter={handleSendMessage}
-                            placeholder="Type a message"
-                            style={{ flex: 1 }}
-                        />
+                            <Input
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                onPressEnter={handleSendMessage}
+                                placeholder="Type a message"
+                                style={{ flex: 1 }}
+                            />
 
-                        <Button
-                            type="primary"
-                            onClick={handleSendMessage}
-                            style={{ marginLeft: "8px" }}
-                            disabled={isUploading}
-                        >
-                            {isUploading ? "Uploading..." : "Send"}
-                        </Button>
-                    </div>
+                            <Button
+                                type="primary"
+                                onClick={handleSendMessage}
+                                style={{ marginLeft: "8px" }}
+                                disabled={isUploading}
+                            >
+                                {isUploading ? "Uploading..." : "Send"}
+                            </Button>
+                        </div>
+                    )}
                     <Modal
                         visible={isImageModalVisible}
                         footer={null}
