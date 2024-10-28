@@ -216,6 +216,9 @@ function AdminChat() {
                                                 marginTop: "8px",
                                                 borderRadius: "5px",
                                             }}
+                                            onClick={() =>
+                                                openImageModal(`${API_URL}/uploads/images/${msg.image}`)
+                                            }
                                         />
                                     )}
                                 </div>
