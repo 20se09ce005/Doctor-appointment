@@ -22,37 +22,25 @@ function AdminChat() {
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
 
-    const fetchData = async () => {
-        dispatch(showLoading());
+    const handleImageUpload = async ({ file, onSuccess, onError }) => {
+        const formData = new FormData();
+        formData.append("image", file);
         try {
-            const response = await get(
-                `${API_URL}/api/admin/get-One-Apply-Ticket?ticketId=${location.state.ticket._id}`
-            );
-            dispatch(hideLoading());
-            if (response.data && response.data.data) {
-                setSelectedTicket(response.data.data);
+            const response = await post(`${API_URL}api/admin/upload`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const data = await response.json();
+            console.log(data);
+            if (response.ok) {
+                setUploadedImage(data.url);
+                onSuccess("Image uploaded successfully");
+            } else {
+                console.error("Upload failed:", data.message);
+                onError(new Error(data.message || "Upload failed"));
             }
         } catch (error) {
-            dispatch(hideLoading());
-            console.error("Error fetching tickets:", error);
-        }
-    };
-
-    const handleSendMessage = async () => {
-        if (newMessage.trim() && ticketId) {
-            const messageData = { userId: "adminId", ticketId, message: newMessage };
-            if (uploadedImage) messageData.image = uploadedImage;
-
-            try {
-                await post(`${API_URL}/api/admin/send-message`, messageData);
-                socket.emit("sendMessage", messageData);
-                setNewMessage("");
-                setUploadedImage(null);
-                fetchMessages();
-            } catch (error) {
-                console.error("Error sending message:", error);
-                alert("Failed to send message. Please try again.");
-            }
+            console.error("Error uploading image:", error);
+            onError(error);
         }
     };
 
@@ -67,7 +55,7 @@ function AdminChat() {
             scrollToBottom();
         }
     }, [messages])
-    
+
     const fetchMessages = async () => {
         try {
             const response = await get(
@@ -77,12 +65,6 @@ function AdminChat() {
             scrollToBottom();
         } catch (error) {
             console.error("Error fetching messages:", error);
-        }
-    };
-
-    const handleImageUpload = (info) => {
-        if (info.file.status === "done") {
-            setUploadedImage(info.file.response.url);
         }
     };
 
@@ -101,7 +83,49 @@ function AdminChat() {
         return `${formattedHours}:${minutes}`;
     };
 
-    const isEditable = selectedTicket?.status === 0;
+    const isEditable = selectedTicket?.status === 0
+    const handleError = (error) => {
+        console.error(error);
+        alert("An error occurred. Please try again.");
+    };
+
+    const fetchData = async () => {
+        dispatch(showLoading());
+        try {
+            const response = await get(
+                `${API_URL}/api/admin/get-One-Apply-Ticket?ticketId=${location.state.ticket._id}`
+            );
+            dispatch(hideLoading());
+            if (response.data && response.data.data) {
+                setSelectedTicket(response.data.data);
+            }
+        } catch (error) {
+            dispatch(hideLoading());
+            handleError(error);
+        }
+    };
+
+
+    const handleSendMessage = async () => {
+        if ((newMessage.trim() || uploadedImage) && ticketId) {
+            const messageData = {
+                userId: "adminId",
+                ticketId,
+                message: newMessage,
+                image: uploadedImage,
+            };
+
+            try {
+                await post(`${API_URL}/api/admin/send-message`, messageData);
+                socket.emit("sendMessage", messageData);
+                setNewMessage("");
+                setUploadedImage(null);
+                fetchMessages();
+            } catch (error) {
+                handleError(error);
+            }
+        }
+    };
 
     const openImageModal = () => setIsImageModalVisible(true);
     const closeImageModal = () => setIsImageModalVisible(false);
@@ -118,7 +142,7 @@ function AdminChat() {
                             <div style={{ marginTop: "16px" }}>
                                 <Title level={5}>Attached Images</Title>
                                 <img
-                                    src={`${API_URL}/uploads/images/${selectedTicket.photo}`}
+                                    src={`${API_URL}/uploads/images/${selectedTicket.photo[0]}`}
                                     alt="Ticket"
                                     style={{ width: "275px", height: "156px", cursor: "pointer" }}
                                     onClick={openImageModal}
@@ -159,6 +183,18 @@ function AdminChat() {
                                     }}
                                 >
                                     {msg.messages}
+                                    {msg.image && (
+                                        <img
+                                            src={`${API_URL}/uploads/images/${msg.image}`}
+                                            alt="chat-img"
+                                            style={{
+                                                width: "100px",
+                                                height: "100px",
+                                                marginTop: "8px",
+                                                borderRadius: "5px",
+                                            }}
+                                        />
+                                    )}
                                 </div>
 
                                 <div
@@ -177,14 +213,12 @@ function AdminChat() {
                     {isEditable && (
                         <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
                             <Upload
-                                action={`${API_URL}/api/upload`}
-                                showUploadList={false}
-                                onChange={handleImageUpload}
+                                name="image"
+                                listType="picture"
+                                showUploadList={true}
+                                customRequest={handleImageUpload}
                             >
-                                <Button
-                                    icon={<PlusOutlined />}
-                                    style={{ marginRight: "8px" }}
-                                />
+                                <Button icon={<PlusOutlined />} style={{ marginRight: "8px" }} />
                             </Upload>
 
                             <Input
@@ -224,7 +258,7 @@ function AdminChat() {
                         }}
                     />
                     <img
-                        src={`${API_URL}/uploads/images/${selectedTicket?.photo}`}
+                        src={`${API_URL}/uploads/images/${selectedTicket?.photo[0]}`}
                         alt="Ticket"
                         style={{ width: "100%", height: "auto" }}
                     />

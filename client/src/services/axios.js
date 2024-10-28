@@ -57,7 +57,7 @@ axios.interceptors.response.use(
         return response
     },
     (error) => {
-        // console.log("------------", error);
+        console.log("------------", error);
         if (error.response.status === 423) {
         }
         if (error.response.status === 401) {

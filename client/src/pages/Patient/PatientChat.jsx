@@ -28,6 +28,8 @@ function PatientChat() {
             const response = await get(`${API_URL}/api/admin/get-All-User-Apply-Ticket`);
             dispatch(hideLoading());
             if (response.data && response.data.data) {
+                console.log(response);
+                
                 setSelectedTicket(response.data.data[0]);
             }
         } catch (error) {
@@ -113,7 +115,7 @@ function PatientChat() {
                             <div style={{ marginTop: "16px" }}>
                                 <Title level={5}>Attached Images</Title>
                                 <img
-                                    src={`${API_URL}/uploads/images/${selectedTicket.photo}`}
+                                    src={`${API_URL}/uploads/images/${selectedTicket.photo[0]}`}
                                     alt="Ticket"
                                     style={{ width: "275px", height: "156px", cursor: "pointer" }}
                                     onClick={openImageModal}

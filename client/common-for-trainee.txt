@@ -202,3 +202,19 @@ exports.decryptionProcess = async (req, res, next) => {
 
 -----------------------------------------------------------------------------------------------------------------------
 contect number: 8700710792
+
+
+-----------------------------------------------------------------------------------------------------------------------
+
+const handleImageUpload = async (file) => {
+        const formData = new FormData();
+        formData.append("image", file);
+        const response = await post(`${API_URL}api/admin/upload`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        }).then((response) => {
+            console.log("Upload response:", response);
+            setUploadedImage(response);
+        }).catch((error) => {
+            toastMessage(error);
+        })
+    }

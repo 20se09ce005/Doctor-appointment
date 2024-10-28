@@ -9,18 +9,19 @@ import toastMessage from "../utils/toast";
 import { useLocation } from 'react-router-dom';
 
 function TicketForm() {
-    const location=useLocation();
+    const location = useLocation();
     console.log(location.state.ticket._id);
-    
+
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.user);
     const [fileList, setFileList] = useState([]);
 
     const handleUploadChange = ({ fileList: newFileList }) => {
+        console.log("Updated File List:", newFileList);
         setFileList(newFileList);
     };
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         if (fileList.length === 0) {
             toastMessage('error', 'Please upload at least one image');
             return;
@@ -28,23 +29,31 @@ function TicketForm() {
 
         const formData = new FormData();
         fileList.forEach((file) => {
-            formData.append('images', file.originFileObj);
+            
+            formData.append('image', file.originFileObj);
         });
 
         dispatch(showLoading());
 
-        post(`${API_URL}/api/admin/uploadMultipleImage`, formData,{
+        await post(`${API_URL}/api/admin/upload`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
             .then((uploadRes) => {
+                console.log(uploadRes,'-------------------------------------------');
+                
                 toastMessage('success', uploadRes.data.messages || 'Images uploaded successfully');
                 console.log('Uploaded Images:', uploadRes.data.imagePaths);
 
-                return post(`${API_URL}/api/admin/apply-ticket`, {...data,userId: user._id,ticketid:location.state.ticket._id,photo: uploadRes.data.imagePaths, });
+                return post(`${API_URL}/api/admin/apply-ticket`, {
+                    ...data,
+                    userId: user._id,
+                    ticketid: location.state.ticket._id,
+                    photo: uploadRes.data,
+                });
             })
             .then((ticketRes) => {
                 toastMessage('success', ticketRes.data.messages || 'Ticket applied successfully');
-                setFileList([]); 
+                setFileList([]);
             })
             .catch((err) => {
                 const errorMessage = Object.values(err.response?.data || {}).toString();
