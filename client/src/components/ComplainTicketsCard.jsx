@@ -14,9 +14,33 @@ function ComplainTicketsCard({ ticket }) {
             <p className="mb-2"><b>Title: </b>{ticket.title}</p>
             <p className="mb-2"><b>Reason: </b>{ticket.reason}</p>
 
-            <button className="primary-button px-3" onClick={handleApplyClick}>Chat</button>
+            {ticket.status === 1 && (
+                <p className="mb-2" style={{ color: "green" }}>
+                    <b>Status: </b>Accepted Tickets
+                </p>
+            )}
+            {ticket.status === 2 && (
+                <p className="mb-2" style={{ color: "red" }}>
+                    <b>Status: </b>Rejected Tickets
+                </p>
+            )}
+            {ticket.status === 0 && (
+                <p className="mb-2" style={{ color: "red" }}>
+                    <b>Status: </b>Pending Tickets
+                </p>
+            )}
+
+            {(ticket.status === 1 || ticket.status === 2) && (
+                <div className="response-field">
+                    <p><b>Response:</b> {ticket.response || "No response provided."}</p>
+                </div>
+            )}
+
+            <button className="primary-button px-3" onClick={handleApplyClick}>
+                Chat
+            </button>
         </div>
-    )
+    );
 }
 
-export default ComplainTicketsCard
+export default ComplainTicketsCard;
