@@ -20,6 +20,7 @@ function PatientChat() {
     const [uploadedImage, setUploadedImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [fileList, setFileList] = useState([]);
+    const [modalImageSrc, setModalImageSrc] = useState("");
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -117,12 +118,13 @@ function PatientChat() {
             setIsUploading(false);
         }
     };
-
-    const formatTime = (time) => {
-        const [hours, minutes] = time.split(':');
-        const formattedHours = hours % 12 || 12;
-        return `${formattedHours}:${minutes}`;
-    };
+    
+    // const formatTime = (time) => {
+    //     const [hours, minutes] = time.split(':');
+    //     const formattedHours = hours % 12 || 12;
+    //     return `${formattedHours}:${minutes}`;
+    // };
+    // const isEditable = selectedTicket?.status === 0;
 
     socket.on("response", (message) => {
         fetchMessages();
@@ -136,13 +138,18 @@ function PatientChat() {
         initializeChat();
     }, []);
 
-    const isEditable = selectedTicket?.status === 0;
     const handleError = (error) => {
         console.error(error);
         alert("An error occurred. Please try again.");
     };
-    const openImageModal = () => setIsImageModalVisible(true);
-    const closeImageModal = () => setIsImageModalVisible(false);
+
+    const openImageModal = (imageSrc) => {
+        setModalImageSrc(imageSrc);
+        setIsImageModalVisible(true);
+    };
+    const closeImageModal = () => {
+        setIsImageModalVisible(false);
+    };
 
     return (
         <Row>
@@ -159,7 +166,7 @@ function PatientChat() {
                                     src={`${API_URL}/uploads/images/${selectedTicket.photo[0]}`}
                                     alt="Ticket"
                                     style={{ width: "275px", height: "156px", cursor: "pointer" }}
-                                    onClick={openImageModal}
+                                    onClick={() => openImageModal(`${API_URL}/uploads/images/${selectedTicket.photo[0]}`)}
                                 />
                             </div>
                         </>
@@ -252,6 +259,33 @@ function PatientChat() {
                             {isUploading ? "Uploading..." : "Send"}
                         </Button>
                     </div>
+                    <Modal
+                        visible={isImageModalVisible}
+                        footer={null}
+                        onCancel={closeImageModal}
+                        centered
+                        bodyStyle={{ padding: 0 }}
+                    >
+                        <img
+                            src={modalImageSrc}
+                            alt="Modal View"
+                            style={{ width: "100%", height: "auto" }}
+                        />
+                        <Button
+                            icon={<CloseOutlined />}
+                            style={{
+                                position: "absolute",
+                                top: "10px",
+                                right: "10px",
+                                zIndex: 1000,
+                                border: "none",
+                                backgroundColor: "transparent",
+                                color: "white",
+                                fontSize: "18px",
+                            }}
+                            onClick={closeImageModal}
+                        />
+                    </Modal>
                 </Card>
             </Col>
         </Row>

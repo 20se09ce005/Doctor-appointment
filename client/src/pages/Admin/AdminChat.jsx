@@ -168,7 +168,7 @@ function AdminChat() {
                                     src={`${API_URL}/uploads/images/${selectedTicket.photo[0]}`}
                                     alt="Ticket"
                                     style={{ width: "275px", height: "156px", cursor: "pointer" }}
-                                    onClick={openImageModal}
+                                    onClick={() => openImageModal(`${API_URL}/uploads/images/${selectedTicket.photo[0]}`)}
                                 />
                             </div>
                         </>
@@ -261,6 +261,33 @@ function AdminChat() {
                             {isUploading ? "Uploading..." : "Send"}
                         </Button>
                     </div>
+                    <Modal
+                        visible={isImageModalVisible}
+                        footer={null}
+                        onCancel={closeImageModal}
+                        centered
+                        bodyStyle={{ padding: 0 }}
+                    >
+                        <img
+                            src={modalImageSrc}
+                            alt="Modal View"
+                            style={{ width: "100%", height: "auto" }}
+                        />
+                        <Button
+                            icon={<CloseOutlined />}
+                            style={{
+                                position: "absolute",
+                                top: "10px",
+                                right: "10px",
+                                zIndex: 1000,
+                                border: "none",
+                                backgroundColor: "transparent",
+                                color: "white",
+                                fontSize: "18px",
+                            }}
+                            onClick={closeImageModal}
+                        />
+                    </Modal>
                 </Card>
             </Col>
         </Row>
