@@ -20,6 +20,7 @@ function AdminChat() {
     const [uploadedImage, setUploadedImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [fileList, setFileList] = useState([]);
+    const [modalImageSrc, setModalImageSrc] = useState("");
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -81,13 +82,13 @@ function AdminChat() {
         initializeChat();
     }, []);
 
-    const formatTime = (time) => {
-        const [hours, minutes] = time.split(':');
-        const formattedHours = hours % 12 || 12;
-        return `${formattedHours}:${minutes}`;
-    };
+    // const formatTime = (time) => {
+    //     const [hours, minutes] = time.split(':');
+    //     const formattedHours = hours % 12 || 12;
+    //     return `${formattedHours}:${minutes}`;
+    // };
+    // const isEditable = selectedTicket?.status === 0;
 
-    const isEditable = selectedTicket?.status === 0
     const handleError = (error) => {
         console.error(error);
         alert("An error occurred. Please try again.");
@@ -143,8 +144,14 @@ function AdminChat() {
         }
     };
 
-    const openImageModal = () => setIsImageModalVisible(true);
-    const closeImageModal = () => setIsImageModalVisible(false);
+    const openImageModal = (imageSrc) => {
+        setModalImageSrc(imageSrc);
+        setIsImageModalVisible(true);
+    };
+
+    const closeImageModal = () => {
+        setIsImageModalVisible(false);
+    };
 
     return (
         <Row>
