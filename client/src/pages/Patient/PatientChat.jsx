@@ -19,6 +19,7 @@ function PatientChat() {
     const [isImageModalVisible, setIsImageModalVisible] = useState(false);
     const [uploadedImage, setUploadedImage] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [fileList, setFileList] = useState([]);
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -61,6 +62,7 @@ function PatientChat() {
                     socket.emit("sendMessage", messageData);
                     setNewMessage("");
                     setUploadedImage(null);
+                    setFileList([]);
                     fetchMessages();
                 } else {
                     handleError(new Error("Failed to send message"));
@@ -209,68 +211,49 @@ function PatientChat() {
                                     )}
                                 </div>
 
-                                <div style={{ fontSize: "12px", color: "darkgray", marginTop: "4px", }}>
-                                    {formatTime(msg.time)}
+                                <div
+                                    style={{
+                                        fontSize: "12px",
+                                        color: "darkgray",
+                                        marginTop: "4px",
+                                    }}
+                                >
+                                    {msg.time}
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {isEditable && (
-                        <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
-                            <Upload
-                                name="image"
-                                listType="picture"
-                                showUploadList={true}
-                                customRequest={handleImageUpload}
-                            >
-                                <Button icon={<PlusOutlined />} style={{ marginRight: "8px" }} />
-                            </Upload>
+                    <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
+                        <Upload
+                            name="image"
+                            listType="picture"
+                            fileList={fileList}
+                            onChange={({ fileList }) => setFileList(fileList)}
+                            customRequest={handleImageUpload}
+                        >
+                            <Button icon={<PlusOutlined />} style={{ marginRight: "8px" }} />
+                        </Upload>
 
-                            <Input
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onPressEnter={handleSendMessage}
-                                placeholder="Type a message"
-                                style={{ flex: 1 }}
-                            />
+                        <Input
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onPressEnter={handleSendMessage}
+                            placeholder="Type a message"
+                            style={{ flex: 1 }}
+                        />
 
-                            <Button
-                                type="primary"
-                                onClick={handleSendMessage}
-                                style={{ marginLeft: "8px" }}
-                                disabled={isUploading}
-                            >
-                                {isUploading ? "Uploading..." : "Send"}
-                            </Button>
-                        </div>
-                    )}
+                        <Button
+                            type="primary"
+                            onClick={handleSendMessage}
+                            style={{ marginLeft: "8px" }}
+                            disabled={isUploading}
+                        >
+                            {isUploading ? "Uploading..." : "Send"}
+                        </Button>
+                    </div>
                 </Card>
             </Col>
-
-            <Modal
-                visible={isImageModalVisible}
-                footer={null}
-                closable={false}
-                onCancel={closeImageModal}
-                centered
-                bodyStyle={{ padding: 0, textAlign: "center" }}
-            >
-                <div style={{ position: "relative" }}>
-                    <CloseOutlined
-                        onClick={closeImageModal}
-                        style={{
-                            position: "absolute", top: 10, right: 10, fontSize: "15px", color: "white",
-                            cursor: "pointer", background: "rgba(0, 0, 0, 0.6)", borderRadius: "50%", padding: "4px",
-                        }} />
-
-                    <img
-                        src={`${API_URL}/uploads/images/${selectedTicket?.photo[0]}`}
-                        alt="Ticket"
-                        style={{ width: "100%", height: "auto" }}
-                    />
-                </div>
-            </Modal>
         </Row>
     );
 }
