@@ -24,6 +24,7 @@ function AdminChat() {
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
+    const id = location.state.ticket._id;
 
     const handleImageUpload = async ({ file, onSuccess, onError }) => {
         setIsUploading(true);
@@ -63,7 +64,7 @@ function AdminChat() {
     const fetchMessages = async () => {
         try {
             const response = await get(
-                `${API_URL}/api/admin/get-Messages?ticketId=${location.state.ticket._id}`
+                `${API_URL}/api/admin/get-Messages?ticketId=${id}`
             );
             setMessages(response.data);
             scrollToBottom();
@@ -98,7 +99,7 @@ function AdminChat() {
         dispatch(showLoading());
         try {
             const response = await get(
-                `${API_URL}/api/admin/get-One-Apply-Ticket?ticketId=${location.state.ticket._id}`
+                `${API_URL}/api/admin/get-One-Apply-Ticket?ticketId=${id}`
             );
             dispatch(hideLoading());
             if (response.data && response.data.data) {
@@ -183,8 +184,24 @@ function AdminChat() {
                     <div
                         ref={chatContainerRef}
                         className="chat-container"
-                        style={{ maxHeight: "300px", overflowY: "auto" }}
+                        style={{ maxHeight: "295px", overflowY: "auto" }}
                     >
+                        <div
+                            style={{
+                                position: "sticky",
+                                top: 0,
+                                zIndex: 1,
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                padding: "8px",
+                                margin: "8px 0",
+                            }}
+                        >
+                            <Paragraph style={{ margin: 0, fontWeight: "bold", color: "#0050b3" }}>
+                                {selectedTicket?.reason || "No reason provided"}
+                            </Paragraph>
+                        </div>
                         {messages.map((msg, index) => (
                             <div
                                 key={index}

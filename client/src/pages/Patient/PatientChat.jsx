@@ -181,7 +181,7 @@ function PatientChat() {
                     <div
                         ref={chatContainerRef}
                         className="chat-container"
-                        style={{ maxHeight: "300px", overflowY: "auto" }}
+                        style={{ maxHeight: "295px", overflowY: "auto" }}
                     >
                         {messages.map((msg, index) => (
                             <div
