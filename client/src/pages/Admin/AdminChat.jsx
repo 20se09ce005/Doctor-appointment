@@ -21,6 +21,7 @@ function AdminChat() {
     const [isUploading, setIsUploading] = useState(false);
     const [fileList, setFileList] = useState([]);
     const [modalImageSrc, setModalImageSrc] = useState("");
+    const [reply, setReply] = useState("");
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -63,9 +64,7 @@ function AdminChat() {
 
     const fetchMessages = async () => {
         try {
-            const response = await get(
-                `${API_URL}/api/admin/get-Messages?ticketId=${id}`
-            );
+            const response = await get(`${API_URL}/api/admin/get-Messages?ticketId=${id}`);
             setMessages(response.data);
             scrollToBottom();
         } catch (error) {
@@ -83,13 +82,6 @@ function AdminChat() {
         initializeChat();
     }, []);
 
-    // const formatTime = (time) => {
-    //     const [hours, minutes] = time.split(':');
-    //     const formattedHours = hours % 12 || 12;
-    //     return `${formattedHours}:${minutes}`;
-    // };
-    // const isEditable = selectedTicket?.status === 0;
-
     const handleError = (error) => {
         console.error(error);
         alert("An error occurred. Please try again.");
@@ -98,9 +90,7 @@ function AdminChat() {
     const fetchData = async () => {
         dispatch(showLoading());
         try {
-            const response = await get(
-                `${API_URL}/api/admin/get-One-Apply-Ticket?ticketId=${id}`
-            );
+            const response = await get(`${API_URL}/api/admin/get-One-Apply-Ticket?ticketId=${id}`);
             dispatch(hideLoading());
             if (response.data && response.data.data) {
                 setSelectedTicket(response.data.data);
@@ -111,6 +101,25 @@ function AdminChat() {
         }
     };
 
+    const handleTicketResponse = async (actionType) => {
+        if (!reply.trim()) {
+            return alert("Please enter a reply.");
+        }
+        dispatch(showLoading());
+        try {
+            await post(`${API_URL}/api/admin/ticket-response`, {
+                ticketId,
+                response: actionType,
+                reply,
+            });
+            dispatch(hideLoading());
+            setReply("");
+            fetchData();
+        } catch (error) {
+            dispatch(hideLoading());
+            handleError(error);
+        }
+    };
 
     const handleSendMessage = async () => {
         if (isUploading) {
@@ -125,11 +134,8 @@ function AdminChat() {
                 image: uploadedImage,
             };
 
-            console.log("Sending Message Data:", messageData);
-
             try {
                 const response = await post(`${API_URL}/api/admin/send-message`, messageData);
-
                 if (response.status === 200) {
                     socket.emit("sendMessage", messageData);
                     setNewMessage("");
@@ -180,7 +186,30 @@ function AdminChat() {
             </Col>
 
             <Col span={16} style={{ padding: "8px" }}>
-                <Card title="Chat" bordered>
+                <Card
+                    title={
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span>Chat</span>
+                            <div>
+                                <Button
+                                    type="primary"
+                                    style={{ marginRight: "8px" }}
+                                    onClick={() => handleTicketResponse("Accept")}
+                                >
+                                    Accept
+                                </Button>
+                                <Button
+                                    type="danger"
+                                    onClick={() => handleTicketResponse("Reject")}
+                                >
+                                    Reject
+                                </Button>
+                            </div>
+                        </div>
+                    }
+                    bordered
+                >
+
                     <div
                         ref={chatContainerRef}
                         className="chat-container"

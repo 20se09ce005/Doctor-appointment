@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row, Modal, Input, Button } from "antd";
 import { get, post } from "../../services/axios";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom"; // Import for navigation
+import { useNavigate } from "react-router-dom";
 import { API_URL } from "../../services/config";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import SupportTicketCard from "../../components/SupportTicketCard";

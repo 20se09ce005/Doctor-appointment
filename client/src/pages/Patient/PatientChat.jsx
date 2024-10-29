@@ -120,13 +120,6 @@ function PatientChat() {
         }
     };
 
-    // const formatTime = (time) => {
-    //     const [hours, minutes] = time.split(':');
-    //     const formattedHours = hours % 12 || 12;
-    //     return `${formattedHours}:${minutes}`;
-    // };
-    // const isEditable = selectedTicket?.status === 0;
-
     socket.on("response", (message) => {
         fetchMessages();
     });
