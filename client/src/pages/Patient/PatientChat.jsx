@@ -24,6 +24,7 @@ function PatientChat() {
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
+    const id = location.state.ticket._id;
 
     const fetchData = async () => {
         dispatch(showLoading());
@@ -88,7 +89,7 @@ function PatientChat() {
 
     const fetchMessages = async () => {
         try {
-            const response = await get(`${API_URL}/api/patient/get-Messages?ticketId=${location.state.ticket._id}`);
+            const response = await get(`${API_URL}/api/patient/get-Messages?ticketId=${id}`);
             setMessages(response.data);
             scrollToBottom();
         } catch (error) {
@@ -183,6 +184,22 @@ function PatientChat() {
                         className="chat-container"
                         style={{ maxHeight: "295px", overflowY: "auto" }}
                     >
+                        <div
+                            style={{
+                                position: "sticky",
+                                top: 0,
+                                zIndex: 1,
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                padding: "8px",
+                                margin: "8px 0",
+                            }}
+                        >
+                            <Paragraph style={{ margin: 0, fontWeight: "bold", color: "#0050b3" }}>
+                                {selectedTicket?.reason || "No reason provided"}
+                            </Paragraph>
+                        </div>
                         {messages.map((msg, index) => (
                             <div
                                 key={index}
