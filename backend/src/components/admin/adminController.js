@@ -110,7 +110,7 @@ const uploadMultipleImage = async (req, res) => {
 
         return common.sendSuccess(req, res, { imagePaths: filenames });
     });
-};
+}
 
 const applyTicket = async (req, res) => {
     try {
@@ -244,7 +244,7 @@ const sendmessage = async (req, res) => {
             time: formatTime,
             date: formatDate,
             messages: message,
-            image: image, // Save image path if provided
+            image: image,
             senderId: adminId._id,
             receiverId: ticket.userId,
             ticketId: ticket._id,
@@ -257,7 +257,7 @@ const sendmessage = async (req, res) => {
         console.log(error);
         return common.sendError(req, res, { messages: error.message }, 500);
     }
-};
+}
 
 const getMessages = async (req, res) => {
     try {
