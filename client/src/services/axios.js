@@ -46,7 +46,10 @@ export function post(url, data = [], options = {}) {
     return AxiosMiddleware('post', url, data, options)
 }
 export function patch(url, data = [], options = {}) {
-    return AxiosMiddleware('post', url, data, options)
+    return AxiosMiddleware('patch', url, data, options)
+}
+export function Delete(url, data = [], options = {}) {
+    return AxiosMiddleware('delete', url, data, options)
 }
 
 axios.interceptors.response.use(

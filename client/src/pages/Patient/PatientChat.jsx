@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Row, Col, Card, Input, Button, Typography, Modal, Upload } from "antd";
-import { get, post } from "../../services/axios";
+import { get, post , Delete} from "../../services/axios";
 import { useDispatch } from "react-redux";
 import { API_URL } from "../../services/config";
 import { socket } from "../../utils/socket";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { useLocation } from "react-router-dom";
 import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
+import { Popover, Space } from "antd";
+import { EllipsisOutlined } from "@ant-design/icons";
 
 const { Paragraph, Title } = Typography;
 
@@ -21,6 +23,7 @@ function PatientChat() {
     const [isUploading, setIsUploading] = useState(false);
     const [fileList, setFileList] = useState([]);
     const [modalImageSrc, setModalImageSrc] = useState("");
+    const [reply, setReply] = useState("");
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -89,7 +92,7 @@ function PatientChat() {
 
     const fetchMessages = async () => {
         try {
-            const response = await get(`${API_URL}/api/patient/get-Messages?ticketId=${id}`);
+            const response = await get(`${API_URL}/api/patient/get-Messages?ticketId=${id}&userId=${userId}`);
             setMessages(response.data);
             scrollToBottom();
         } catch (error) {
@@ -133,8 +136,39 @@ function PatientChat() {
     }, []);
 
     const handleError = (error) => {
-        console.error(error);
+        console.error("Error:", error.response?.data || error.message);
         alert("An error occurred. Please try again.");
+    };
+
+    const handleDeleteMessage = async (messageId) => {
+        try {
+            const response = await Delete(`${API_URL}/api/admin/delete-message?id=${messageId}`);
+            console.log("Delete response:", response);
+            if (response.status === 200) {
+                alert("Message deleted successfully.");
+                fetchMessages();
+            } else {
+                handleError(new Error("Failed to delete message"));
+            }
+            console.log("Deleting message with ID:", messageId);
+        } catch (error) {
+            handleError(error);
+        }
+    };
+
+    const handleDeleteMessageForUser = async (messageId) => {
+        try {
+            const response = await Delete(`${API_URL}/api/admin/delete-message-for-me?id=${messageId}`, { userId });
+            if (response.status === 200) {
+                alert("Message deleted for you.");
+                fetchMessages();
+            } else {
+                handleError(new Error("Failed to delete message for you"));
+            }
+            console.log("User ID for delete-message-for-me:", userId);
+        } catch (error) {
+            handleError(error);
+        }
     };
 
     const openImageModal = (imageSrc) => {
@@ -172,7 +206,7 @@ function PatientChat() {
 
             <Col span={16} style={{ padding: "8px" }}>
                 <Card title="Chat" bordered>
-                    <div
+                <div
                         ref={chatContainerRef}
                         className="chat-container"
                         style={{ maxHeight: "295px", overflowY: "auto" }}
@@ -199,47 +233,73 @@ function PatientChat() {
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
-                                    alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    justifyContent: msg.senderId === userId ? "flex-end" : "flex-start",
                                     margin: "8px 0",
                                     paddingRight: "8px",
                                 }}
                             >
                                 <div
                                     style={{
-                                        background: msg.senderId === userId ? "#1890ff" : "#f0f0f0",
-                                        color: msg.senderId === userId ? "white" : "black",
-                                        padding: "8px 12px",
-                                        borderRadius: "8px",
-                                        maxWidth: "70%",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
                                     }}
                                 >
-                                    {msg.messages}
-                                    {msg.image && (
-                                        <img
-                                            src={`${API_URL}/uploads/images/${msg.image}`}
-                                            alt="chat-img"
-                                            style={{
-                                                width: "100px",
-                                                height: "100px",
-                                                marginTop: "8px",
-                                                borderRadius: "5px",
-                                            }}
-                                            onClick={() =>
-                                                openImageModal(`${API_URL}/uploads/images/${msg.image}`)
-                                            }
-                                        />
-                                    )}
+                                    <div
+                                        style={{
+                                            background: msg.senderId === userId ? "#1890ff" : "#f0f0f0",
+                                            color: msg.senderId === userId ? "white" : "black",
+                                            padding: "8px 12px",
+                                            borderRadius: "8px",
+                                            maxWidth: "70%",
+                                        }}
+                                    >
+                                        {msg.messages}
+
+                                        {msg.image && (
+                                            <img
+                                                src={`${API_URL}/uploads/images/${msg.image}`}
+                                                alt="chat-img"
+                                                style={{
+                                                    width: "100px",
+                                                    height: "100px",
+                                                    marginTop: "8px",
+                                                    borderRadius: "5px",
+                                                    cursor: "pointer",
+                                                }}
+                                                onClick={() =>
+                                                    openImageModal(`${API_URL}/uploads/images/${msg.image}`)
+                                                }
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div
+                                        style={{
+                                            fontSize: "12px",
+                                            color: "lightgray",
+                                            marginTop: "4px",
+                                        }}
+                                    >
+                                        {msg.time}
+                                    </div>
                                 </div>
 
-                                <div
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "darkgray",
-                                        marginTop: "4px",
-                                    }}
+                                <Popover
+                                    trigger="click"
+                                    content={
+                                        <Space direction="vertical">
+                                            <Button type="text" danger onClick={() => handleDeleteMessage(msg._id)}>
+                                                Delete Message
+                                            </Button>
+                                            <Button type="text" onClick={() => handleDeleteMessageForUser(msg._id)}>
+                                                Delete Message for Me
+                                            </Button>
+                                        </Space>
+                                    }
                                 >
-                                    {msg.time}
-                                </div>
+                                    <EllipsisOutlined style={{ fontSize: "16px", cursor: "pointer", marginLeft: "8px", alignSelf: "center" }} />
+                                </Popover>
                             </div>
                         ))}
                     </div>
