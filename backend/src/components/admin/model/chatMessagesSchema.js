@@ -35,6 +35,9 @@ const chatMessagesSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        deletedId:{
+            type: mongoose.Schema.Types.ObjectId,
+        }
     },
     { timestamps: true }
 );

@@ -259,16 +259,6 @@ const sendmessage = async (req, res) => {
     }
 }
 
-const getMessages = async (req, res) => {
-    try {
-        const messageList = await ChatMessages.find({ ticketId: new mongoose.Types.ObjectId(req.query.ticketId) });
-        return res.json(messageList);
-    } catch (error) {
-        console.log(error)
-        return common.sendError(req, res, { message: error.message }, 500);
-    }
-}
-
 const upload = async (req, res) => {
     try {
         if (!req.file) {
@@ -280,8 +270,49 @@ const upload = async (req, res) => {
     }
 }
 
+const getMessages = async (req, res) => {
+    try {
+        const userId = req.query.userId;
+
+        const messageList = await ChatMessages.find({
+            ticketId: new mongoose.Types.ObjectId(req.query.ticketId),
+            status: 0, $or: [{ deletedId: { $ne: userId } }, { deletedId: { $exists: false } }]
+        });
+        return res.json(messageList);
+    } catch (error) {
+        console.log(error);
+        return common.sendError(req, res, { message: error.message }, 500);
+    }
+}
+
+const deleteMessages = async (req, res) => {
+    try {
+        console.log(123456)
+        const messageId = req.query.id;
+        await ChatMessages.updateOne({ _id: new mongoose.Types.ObjectId(messageId) }, { $set: { status: 2 } });
+        io.io.emit("response", { message: "Message deleted" });
+        return common.sendSuccess(req, res, { message: "Message deleted successfully" });
+    } catch (error) {
+        console.log(error);
+        return common.sendError(req, res, { message: error.message }, 500);
+    }
+}
+
+const deleteMessageForMe = async (req, res) => {
+    try {
+        const userId = req.body.userId;
+        const messageId = req.query.id;
+        await ChatMessages.updateOne({ _id: new mongoose.Types.ObjectId(messageId) }, { $set: { deletedId: userId } });
+        io.io.emit("response", { message: "Message deleted for user" });
+        return common.sendSuccess(req, res, { message: "Message deleted for you successfully" });
+    } catch (error) {
+        console.log(error);
+        return common.sendError(req, res, { message: error.message }, 500);
+    }
+}
+
 module.exports = {
     getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
     getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket, uploadMultipleImage, sendmessage,
-    getMessages, ticketResponse, getAllUserApplyTicket, upload
+    getMessages, ticketResponse, getAllUserApplyTicket, upload, deleteMessages, deleteMessageForMe
 }

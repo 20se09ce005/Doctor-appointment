@@ -8,7 +8,9 @@ const uploadImage = require("../utils/upload");
 
 const { getalldoctors, getallusers, changedoctoraccountstatus, supportTicketCreate, getAllSuportTicket,
     getOneSupportTicket, applyTicket, getAllApplyTicket, getOneApplyTicket,
-    uploadMultipleImage, sendmessage, getMessages, ticketResponse, getAllUserApplyTicket, upload }
+    uploadMultipleImage, sendmessage, getMessages, ticketResponse, getAllUserApplyTicket, upload,
+    deleteMessages,
+    deleteMessageForMe }
     = require("../components/admin/adminController");
 
 router.get("/get-all-doctors", authMiddleware, getalldoctors);
@@ -29,5 +31,8 @@ router.post("/ticket-response", decryptionProcess.decryptionProcess, authMiddlew
 router.post("/send-message", decryptionProcess.decryptionProcess, authMiddleware, sendmessage);
 router.get("/get-Messages", getMessages);
 router.post("/upload", uploadImage.uploadImage.single("image"), upload);
+
+router.delete("/delete-message", decryptionProcess.decryptionProcess, authMiddleware, deleteMessages);
+router.delete("/delete-message-for-me", decryptionProcess.decryptionProcess, authMiddleware, deleteMessageForMe);
 
 module.exports = router;

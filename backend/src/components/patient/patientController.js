@@ -248,10 +248,15 @@ const sendmessage = async (req, res) => {
 
 const getMessages = async (req, res) => {
     try {
-        const messageList = await ChatMessages.find({ ticketId: new mongoose.Types.ObjectId(req.query.ticketId) });
+        const userId = req.query.userId;
+
+        const messageList = await ChatMessages.find({
+            ticketId: new mongoose.Types.ObjectId(req.query.ticketId),
+            status: 0, $or: [{ deletedId: { $ne: userId } }, { deletedId: { $exists: false } }]
+        });
         return res.json(messageList);
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return common.sendError(req, res, { message: error.message }, 500);
     }
 }
