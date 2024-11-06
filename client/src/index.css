@@ -175,3 +175,8 @@ p{
 .secondary-button:hover {
   background-color: #d32f2f;
 }
+.anticon svg {
+  display: inline-block;
+  color: black;
+  rotate: 90deg;
+}

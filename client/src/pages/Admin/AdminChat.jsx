@@ -270,73 +270,72 @@ function AdminChat() {
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
-                                    justifyContent: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
                                     margin: "8px 0",
                                     paddingRight: "8px",
                                 }}
                             >
                                 <div
                                     style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
+                                        position: "relative",
+                                        background: msg.senderId === userId ? "#1890ff" : "#f0f0f0",
+                                        color: msg.senderId === userId ? "white" : "black",
+                                        padding: "8px 12px",
+                                        borderRadius: "8px",
+                                        maxWidth: "70%",
                                     }}
                                 >
-                                    <div
-                                        style={{
-                                            background: msg.senderId === userId ? "#1890ff" : "#f0f0f0",
-                                            color: msg.senderId === userId ? "white" : "black",
-                                            padding: "8px 12px",
-                                            borderRadius: "8px",
-                                            maxWidth: "70%",
-                                        }}
-                                    >
-                                        {msg.messages}
+                                    {msg.messages}
 
-                                        {msg.image && (
-                                            <img
-                                                src={`${API_URL}/uploads/images/${msg.image}`}
-                                                alt="chat-img"
-                                                style={{
-                                                    width: "100px",
-                                                    height: "100px",
-                                                    marginTop: "8px",
-                                                    borderRadius: "5px",
-                                                    cursor: "pointer",
-                                                }}
-                                                onClick={() =>
-                                                    openImageModal(`${API_URL}/uploads/images/${msg.image}`)
-                                                }
-                                            />
-                                        )}
-                                    </div>
+                                    {msg.image && (
+                                        <img
+                                            src={`${API_URL}/uploads/images/${msg.image}`}
+                                            alt="chat-img"
+                                            style={{
+                                                width: "100px",
+                                                height: "100px",
+                                                marginTop: "8px",
+                                                borderRadius: "5px",
+                                                cursor: "pointer",
+                                            }}
+                                            onClick={() =>
+                                                openImageModal(`${API_URL}/uploads/images/${msg.image}`)
+                                            }
+                                        />
+                                    )}
 
-                                    <div
-                                        style={{
-                                            fontSize: "12px",
-                                            color: "lightgray",
-                                            marginTop: "4px",
-                                        }}
+                                    <Popover
+                                        trigger="click"
+                                        content={
+                                            <Space direction="vertical">
+                                                <Button type="text" danger onClick={() => handleDeleteMessage(msg._id)}>
+                                                    Delete Message
+                                                </Button>
+                                                <Button type="text" onClick={() => handleDeleteMessageForUser(msg._id)}>
+                                                    Delete Message for Me
+                                                </Button>
+                                            </Space>
+                                        }
                                     >
-                                        {msg.time}
-                                    </div>
+                                        <EllipsisOutlined
+                                            style={{
+                                                fontSize: "16px", cursor: "pointer", position: "absolute",
+                                                top: "50%", right: "-20px", transform: "translateY(-50%)",
+                                            }}
+                                        />
+                                    </Popover>
                                 </div>
 
-                                <Popover
-                                    trigger="click"
-                                    content={
-                                        <Space direction="vertical">
-                                            <Button type="text" danger onClick={() => handleDeleteMessage(msg._id)}>
-                                                Delete Message
-                                            </Button>
-                                            <Button type="text" onClick={() => handleDeleteMessageForUser(msg._id)}>
-                                                Delete Message for Me
-                                            </Button>
-                                        </Space>
-                                    }
+                                <div
+                                    style={{
+                                        fontSize: "12px",
+                                        color: "lightgray",
+                                        marginTop: "4px",
+                                        alignSelf: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    }}
                                 >
-                                    <EllipsisOutlined style={{ fontSize: "16px", cursor: "pointer", marginLeft: "8px", alignSelf: "center" }} />
-                                </Popover>
+                                    {msg.time}
+                                </div>
                             </div>
                         ))}
                     </div>
