@@ -287,7 +287,6 @@ const getMessages = async (req, res) => {
 
 const deleteMessages = async (req, res) => {
     try {
-        console.log(123456)
         const messageId = req.query.id;
         await ChatMessages.updateOne({ _id: new mongoose.Types.ObjectId(messageId) }, { $set: { status: 2 } });
         io.io.emit("response", { message: "Message deleted" });
