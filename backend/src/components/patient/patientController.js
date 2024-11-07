@@ -252,7 +252,7 @@ const getMessages = async (req, res) => {
 
         const messageList = await ChatMessages.find({
             ticketId: new mongoose.Types.ObjectId(req.query.ticketId),
-            status: 0, $or: [{ deletedId: { $ne: userId } }, { deletedId: { $exists: false } }]
+            $or: [{ deletedId: { $ne: userId } }, { deletedId: { $exists: false } }]
         });
         return res.json(messageList);
     } catch (error) {

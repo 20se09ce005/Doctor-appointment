@@ -273,10 +273,9 @@ const upload = async (req, res) => {
 const getMessages = async (req, res) => {
     try {
         const userId = req.query.userId;
-
         const messageList = await ChatMessages.find({
             ticketId: new mongoose.Types.ObjectId(req.query.ticketId),
-            status: 0, $or: [{ deletedId: { $ne: userId } }, { deletedId: { $exists: false } }]
+            $or: [{ deletedId: { $ne: userId } }, { deletedId: { $exists: false } }]
         });
         return res.json(messageList);
     } catch (error) {
@@ -288,9 +287,9 @@ const getMessages = async (req, res) => {
 const deleteMessages = async (req, res) => {
     try {
         const messageId = req.query.id;
-        await ChatMessages.updateOne({ _id: new mongoose.Types.ObjectId(messageId) }, { $set: { status: 2 } });
+        const Ddata =await ChatMessages.updateOne({ _id: new mongoose.Types.ObjectId(messageId) }, { $set: { status: 2 } });
         io.io.emit("response", { message: "Message deleted" });
-        return common.sendSuccess(req, res, { message: "Message deleted successfully" });
+        return common.sendSuccess(req, res, { message: "Message deleted successfully", data:Ddata });
     } catch (error) {
         console.log(error);
         return common.sendError(req, res, { message: error.message }, 500);
