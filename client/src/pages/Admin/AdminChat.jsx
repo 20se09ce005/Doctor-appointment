@@ -181,6 +181,7 @@ function AdminChat() {
             } else {
                 handleError(new Error("Failed to delete message"));
             }
+            console.log("------------------", messageId);
         } catch (error) {
             handleError(error);
         }
@@ -309,22 +310,30 @@ function AdminChat() {
                                         maxWidth: "70%",
                                     }}
                                 >
-                                    {msg.messages}
-                                    {msg.image && (
-                                        <img
-                                            src={`${API_URL}/uploads/images/${msg.image}`}
-                                            alt="chat-img"
-                                            style={{
-                                                width: "100px",
-                                                height: "100px",
-                                                marginTop: "8px",
-                                                borderRadius: "5px",
-                                                cursor: "pointer",
-                                            }}
-                                            onClick={() =>
-                                                openImageModal(`${API_URL}/uploads/images/${msg.image}`)
-                                            }
-                                        />
+                                    {msg.status === 2 ? (
+                                        <span style={{ fontStyle: "italic", color: "gray" }}>
+                                            This message was deleted
+                                        </span>
+                                    ) : (
+                                        <>
+                                            {msg.messages}
+                                            {msg.image && (
+                                                <img
+                                                    src={`${API_URL}/uploads/images/${msg.image}`}
+                                                    alt="chat-img"
+                                                    style={{
+                                                        width: "100px",
+                                                        height: "100px",
+                                                        marginTop: "8px",
+                                                        borderRadius: "5px",
+                                                        cursor: "pointer",
+                                                    }}
+                                                    onClick={() =>
+                                                        openImageModal(`${API_URL}/uploads/images/${msg.image}`)
+                                                    }
+                                                />
+                                            )}
+                                        </>
                                     )}
 
                                     {!isSelectionMode && (

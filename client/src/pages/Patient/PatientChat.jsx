@@ -280,23 +280,26 @@ function PatientChat() {
                                         maxWidth: "70%",
                                     }}
                                 >
-                                    {msg.messages}
-
-                                    {msg.image && (
-                                        <img
-                                            src={`${API_URL}/uploads/images/${msg.image}`}
-                                            alt="chat-img"
-                                            style={{
-                                                width: "100px",
-                                                height: "100px",
-                                                marginTop: "8px",
-                                                borderRadius: "5px",
-                                                cursor: "pointer",
-                                            }}
-                                            onClick={() =>
-                                                openImageModal(`${API_URL}/uploads/images/${msg.image}`)
-                                            }
-                                        />
+                                    {msg.status === 2 ? (
+                                        <p style={{ fontStyle: "italic", color: "black" }}>This message deleted</p>
+                                    ) : (
+                                        <>
+                                            {msg.messages}
+                                            {msg.image && (
+                                                <img
+                                                    src={`${API_URL}/uploads/images/${msg.image}`}
+                                                    alt="chat-img"
+                                                    style={{
+                                                        width: "100px",
+                                                        height: "100px",
+                                                        marginTop: "8px",
+                                                        borderRadius: "5px",
+                                                        cursor: "pointer",
+                                                    }}
+                                                    onClick={() => openImageModal(`${API_URL}/uploads/images/${msg.image}`)}
+                                                />
+                                            )}
+                                        </>
                                     )}
 
                                     <Popover
