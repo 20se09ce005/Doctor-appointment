@@ -128,11 +128,7 @@ function AdminChat() {
         }
         dispatch(showLoading());
         try {
-            await post(`${API_URL}/api/admin/ticket-response`, {
-                ticketId,
-                response: actionType,
-                reply,
-            });
+            await post(`${API_URL}/api/admin/ticket-response`, { ticketId, response: actionType, reply, });
             dispatch(hideLoading());
             setReply("");
             fetchData();
@@ -181,7 +177,6 @@ function AdminChat() {
             } else {
                 handleError(new Error("Failed to delete message"));
             }
-            console.log("------------------", messageId);
         } catch (error) {
             handleError(error);
         }

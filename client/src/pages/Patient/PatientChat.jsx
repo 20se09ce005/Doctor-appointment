@@ -35,8 +35,6 @@ function PatientChat() {
             const response = await get(`${API_URL}/api/admin/get-All-User-Apply-Ticket`);
             dispatch(hideLoading());
             if (response.data && response.data.data) {
-                console.log(response);
-
                 setSelectedTicket(response.data.data[0]);
             }
         } catch (error) {
@@ -57,9 +55,6 @@ function PatientChat() {
                 message: newMessage,
                 image: uploadedImage,
             };
-
-            console.log("Sending Message Data:", messageData);
-
             try {
                 const response = await post(`${API_URL}/api/admin/send-message`, messageData);
 
@@ -150,7 +145,6 @@ function PatientChat() {
             } else {
                 handleError(new Error("Failed to delete message"));
             }
-            console.log("Deleting message with ID:", messageId);
         } catch (error) {
             handleError(error);
         }
@@ -165,7 +159,6 @@ function PatientChat() {
             } else {
                 handleError(new Error("Failed to delete message for you"));
             }
-            console.log("User ID for delete-message-for-me:", userId);
         } catch (error) {
             handleError(error);
         }
@@ -177,11 +170,6 @@ function PatientChat() {
     };
     const closeImageModal = () => {
         setIsImageModalVisible(false);
-    };
-
-    const toggleSelectionMode = () => {
-        setIsSelectionMode(!isSelectionMode);
-        setSelectedMessages([]);
     };
 
     const handleSelectMessage = (messageId) => {
