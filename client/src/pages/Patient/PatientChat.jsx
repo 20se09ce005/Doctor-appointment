@@ -211,22 +211,6 @@ function PatientChat() {
                         className="chat-container"
                         style={{ maxHeight: "295px", overflowY: "auto" }}
                     >
-                        <div
-                            style={{
-                                position: "sticky",
-                                top: 0,
-                                zIndex: 1,
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                padding: "8px",
-                                margin: "8px 0",
-                            }}
-                        >
-                            <Paragraph style={{ margin: 0, fontWeight: "bold", color: "#0050b3" }}>
-                                {selectedTicket?.reason || "No reason provided"}
-                            </Paragraph>
-                        </div>
                         {messages.map((msg, index) => (
                             <div
                                 key={index}

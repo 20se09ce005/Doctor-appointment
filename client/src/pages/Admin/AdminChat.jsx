@@ -1,18 +1,20 @@
-import React, { useEffect, useState, useRef } from "react";
 import { Row, Col, Card, Input, Button, Typography, Modal, Upload } from "antd";
-import { get, post, Delete } from "../../services/axios";
-import { useDispatch } from "react-redux";
-import { API_URL } from "../../services/config";
-import { socket } from "../../utils/socket";
-import { showLoading, hideLoading } from "../../redux/alertsSlice";
-import { useLocation } from "react-router-dom";
 import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
-import { Popover, Space } from "antd";
+import React, { useEffect, useState, useRef } from "react";
 import { EllipsisOutlined } from "@ant-design/icons";
+import { Popover, Space } from "antd";
+
+import { socket } from "../../utils/socket";
+import { useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { API_URL } from "../../services/config";
+import { get, post, Delete } from "../../services/axios";
+import { showLoading, hideLoading } from "../../redux/alertsSlice";
 
 const { Paragraph, Title } = Typography;
 
 function AdminChat() {
+
     const chatContainerRef = useRef(null);
     const location = useLocation();
     const [messages, setMessages] = useState([]);
@@ -24,6 +26,8 @@ function AdminChat() {
     const [fileList, setFileList] = useState([]);
     const [modalImageSrc, setModalImageSrc] = useState("");
     const [reply, setReply] = useState("");
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedMessages, setSelectedMessages] = useState([]);
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -103,6 +107,24 @@ function AdminChat() {
         }
     };
 
+    const toggleSelectionMode = () => {
+        setIsSelectionMode(!isSelectionMode);
+        setSelectedMessages([]);
+    };
+
+    const handleSelectMessage = (messageId) => {
+        setSelectedMessages((prevSelected) =>
+            prevSelected.includes(messageId)
+                ? prevSelected.filter((id) => id !== messageId) : [...prevSelected, messageId]);
+    };
+
+    const handleDeleteSelectedMessages = async () => {
+        for (const messageId of selectedMessages) {
+            await handleDeleteMessage(messageId);
+        }
+        setIsSelectionMode(false);
+    };
+
     const handleTicketResponse = async (actionType) => {
         if (!reply.trim()) {
             return alert("Please enter a reply.");
@@ -156,7 +178,6 @@ function AdminChat() {
     const handleDeleteMessage = async (messageId) => {
         try {
             const response = await Delete(`${API_URL}/api/admin/delete-message?id=${messageId}`);
-            console.log("Delete response:", response);
             if (response.status === 200) {
                 alert("Message deleted successfully.");
                 fetchMessages();
@@ -178,7 +199,6 @@ function AdminChat() {
             } else {
                 handleError(new Error("Failed to delete message for you"));
             }
-            console.log("User ID for delete-message-for-me:", userId);
         } catch (error) {
             handleError(error);
         }
@@ -242,28 +262,20 @@ function AdminChat() {
                     }
                     bordered
                 >
-
+                    {isSelectionMode && (
+                        <Button
+                            type="danger"
+                            style={{ marginBottom: "8px" }}
+                            onClick={handleDeleteSelectedMessages}
+                        >
+                            Delete Selected Messages
+                        </Button>
+                    )}
                     <div
                         ref={chatContainerRef}
                         className="chat-container"
                         style={{ maxHeight: "295px", overflowY: "auto" }}
                     >
-                        <div
-                            style={{
-                                position: "sticky",
-                                top: 0,
-                                zIndex: 1,
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                padding: "8px",
-                                margin: "8px 0",
-                            }}
-                        >
-                            <Paragraph style={{ margin: 0, fontWeight: "bold", color: "#0050b3" }}>
-                                {selectedTicket?.reason || "No reason provided"}
-                            </Paragraph>
-                        </div>
                         {messages.map((msg, index) => (
                             <div
                                 key={index}
@@ -273,8 +285,22 @@ function AdminChat() {
                                     alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
                                     margin: "8px 0",
                                     paddingRight: "8px",
+                                    position: "relative",
                                 }}
                             >
+                                {isSelectionMode && (
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedMessages.includes(msg._id)}
+                                        onChange={() => handleSelectMessage(msg._id)}
+                                        style={{
+                                            position: "absolute",
+                                            top: "10px",
+                                            left: "-20px",
+                                        }}
+                                    />
+                                )}
+
                                 <div
                                     style={{
                                         position: "relative",
@@ -286,7 +312,6 @@ function AdminChat() {
                                     }}
                                 >
                                     {msg.messages}
-
                                     {msg.image && (
                                         <img
                                             src={`${API_URL}/uploads/images/${msg.image}`}
@@ -304,26 +329,35 @@ function AdminChat() {
                                         />
                                     )}
 
-                                    <Popover
-                                        trigger="click"
-                                        content={
-                                            <Space direction="vertical">
-                                                <Button type="text" danger onClick={() => handleDeleteMessage(msg._id)}>
-                                                    Delete Message
-                                                </Button>
-                                                <Button type="text" onClick={() => handleDeleteMessageForUser(msg._id)}>
-                                                    Delete Message for Me
-                                                </Button>
-                                            </Space>
-                                        }
-                                    >
-                                        <EllipsisOutlined
-                                            style={{
-                                                fontSize: "16px", cursor: "pointer", position: "absolute",
-                                                top: "50%", right: "-20px", transform: "translateY(-50%)",
-                                            }}
-                                        />
-                                    </Popover>
+                                    {!isSelectionMode && (
+                                        <Popover
+                                            trigger="click"
+                                            content={
+                                                <Space direction="vertical">
+                                                    <Button type="text" onClick={toggleSelectionMode}>
+                                                        Select Messages
+                                                    </Button>
+                                                    <Button type="text" danger onClick={() => handleDeleteMessage(msg._id)}>
+                                                        Delete Message
+                                                    </Button>
+                                                    <Button type="text" onClick={() => handleDeleteMessageForUser(msg._id)}>
+                                                        Delete Message for Me
+                                                    </Button>
+                                                </Space>
+                                            }
+                                        >
+                                            <EllipsisOutlined
+                                                style={{
+                                                    fontSize: "16px",
+                                                    cursor: "pointer",
+                                                    position: "absolute",
+                                                    top: "50%",
+                                                    right: "-20px",
+                                                    transform: "translateY(-50%)",
+                                                }}
+                                            />
+                                        </Popover>
+                                    )}
                                 </div>
 
                                 <div
@@ -340,7 +374,7 @@ function AdminChat() {
                         ))}
                     </div>
 
-                    {selectedTicket?.status === 0 && (
+                    {!isSelectionMode && selectedTicket?.status === 0 && (
                         <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
                             <Upload
                                 name="image"
