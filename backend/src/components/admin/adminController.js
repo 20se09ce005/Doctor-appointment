@@ -301,6 +301,10 @@ const deleteMessageForMe = async (req, res) => {
     try {
         const userId = req.body.userId;
         const messageId = req.query.id;
+        const findMessage = await ChatMessages.findOne({ _id: new mongoose.Types.ObjectId(messageId) });
+        if (findMessage.deletedId) {
+            await ChatMessages.updateOne({ _id: new mongoose.Types.ObjectId(messageId) }, { $set: { status: 2 } });
+        }
         await ChatMessages.updateOne({ _id: new mongoose.Types.ObjectId(messageId) }, { $set: { deletedId: userId } });
         io.io.emit("response", { message: "Message deleted for user" });
         return common.sendSuccess(req, res, { message: "Message deleted for you successfully" });
