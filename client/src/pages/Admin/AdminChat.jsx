@@ -1,9 +1,6 @@
-import { Row, Col, Card, Input, Button, Typography, Modal, Upload } from "antd";
-import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
+import { Row, Col, Card, Input, Button, Typography, Modal, Upload, Checkbox, Popover, Space } from "antd";
+import { CloseOutlined, PlusOutlined, EllipsisOutlined } from "@ant-design/icons";
 import React, { useEffect, useState, useRef } from "react";
-import { EllipsisOutlined } from "@ant-design/icons";
-import { Popover, Space } from "antd";
-
 import { socket } from "../../utils/socket";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
@@ -120,7 +117,7 @@ function AdminChat() {
 
     const handleDeleteSelectedMessages = async () => {
         for (const messageId of selectedMessages) {
-            await handleDeleteMessage(messageId);
+            await handleDeleteMessageForUser(messageId);
         }
         setIsSelectionMode(false);
     };
@@ -184,7 +181,6 @@ function AdminChat() {
             } else {
                 handleError(new Error("Failed to delete message"));
             }
-            console.log("Deleting message with ID:", messageId);
         } catch (error) {
             handleError(error);
         }
@@ -244,6 +240,10 @@ function AdminChat() {
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <span>Chat</span>
                             <div>
+                                <Button type="primary" style={{ marginRight: "8px" }}
+                                    onClick={() => setIsSelectionMode(!isSelectionMode)}>
+                                    {isSelectionMode ? "Cancel" : "Select Messages"}
+                                </Button>
                                 <Button
                                     type="primary"
                                     style={{ marginRight: "8px" }}
@@ -262,11 +262,11 @@ function AdminChat() {
                     }
                     bordered
                 >
-                    {isSelectionMode && (
+                    {isSelectionMode && selectedMessages.length > 0 && (
                         <Button
                             type="danger"
                             style={{ marginBottom: "8px" }}
-                            onClick={handleDeleteSelectedMessages}
+                            onClick={() => handleDeleteSelectedMessages()}
                         >
                             Delete Selected Messages
                         </Button>
@@ -289,14 +289,12 @@ function AdminChat() {
                                 }}
                             >
                                 {isSelectionMode && (
-                                    <input
-                                        type="checkbox"
+                                    <Checkbox
                                         checked={selectedMessages.includes(msg._id)}
                                         onChange={() => handleSelectMessage(msg._id)}
                                         style={{
-                                            position: "absolute",
-                                            top: "10px",
-                                            left: "-20px",
+                                            marginRight: "8px",
+                                            color: "green",
                                         }}
                                     />
                                 )}
@@ -334,7 +332,7 @@ function AdminChat() {
                                             trigger="click"
                                             content={
                                                 <Space direction="vertical">
-                                                    <Button type="text" onClick={toggleSelectionMode}>
+                                                    <Button type="text" onClick={toggleSelectionMode} >
                                                         Select Messages
                                                     </Button>
                                                     <Button type="text" danger onClick={() => handleDeleteMessage(msg._id)}>

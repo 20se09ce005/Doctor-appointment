@@ -1,18 +1,17 @@
+import { Row, Col, Card, Input, Button, Typography, Modal, Upload, Checkbox, Popover, Space } from "antd";
+import { CloseOutlined, PlusOutlined, EllipsisOutlined } from "@ant-design/icons";
 import React, { useEffect, useState, useRef } from "react";
-import { Row, Col, Card, Input, Button, Typography, Modal, Upload } from "antd";
-import { get, post, Delete } from "../../services/axios";
-import { useDispatch } from "react-redux";
-import { API_URL } from "../../services/config";
 import { socket } from "../../utils/socket";
-import { showLoading, hideLoading } from "../../redux/alertsSlice";
+import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
-import { Popover, Space } from "antd";
-import { EllipsisOutlined } from "@ant-design/icons";
+import { API_URL } from "../../services/config";
+import { get, post, Delete } from "../../services/axios";
+import { showLoading, hideLoading } from "../../redux/alertsSlice";
 
 const { Paragraph, Title } = Typography;
 
 function PatientChat() {
+
     const chatContainerRef = useRef(null);
     const location = useLocation();
     const [messages, setMessages] = useState([]);
@@ -23,7 +22,8 @@ function PatientChat() {
     const [isUploading, setIsUploading] = useState(false);
     const [fileList, setFileList] = useState([]);
     const [modalImageSrc, setModalImageSrc] = useState("");
-    const [reply, setReply] = useState("");
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedMessages, setSelectedMessages] = useState([]);
     const dispatch = useDispatch();
     const ticketId = selectedTicket?._id;
     const userId = localStorage.getItem("id");
@@ -179,6 +179,24 @@ function PatientChat() {
         setIsImageModalVisible(false);
     };
 
+    const toggleSelectionMode = () => {
+        setIsSelectionMode(!isSelectionMode);
+        setSelectedMessages([]);
+    };
+
+    const handleSelectMessage = (messageId) => {
+        setSelectedMessages((prevSelected) =>
+            prevSelected.includes(messageId)
+                ? prevSelected.filter((id) => id !== messageId) : [...prevSelected, messageId]);
+    };
+
+    const handleDeleteSelectedMessages = async () => {
+        for (const messageId of selectedMessages) {
+            await handleDeleteMessageForUser(messageId);
+        }
+        setIsSelectionMode(false);
+    };
+
     return (
         <Row>
             <Col span={8} style={{ padding: "8px" }}>
@@ -205,7 +223,26 @@ function PatientChat() {
             </Col>
 
             <Col span={16} style={{ padding: "8px" }}>
-                <Card title="Chat" bordered>
+                <Card title={
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span>Chat</span>
+                        <div>
+                            <Button type="primary" style={{ marginRight: "8px" }}
+                                onClick={() => setIsSelectionMode(!isSelectionMode)}>
+                                {isSelectionMode ? "Cancel" : "Select Messages"}
+                            </Button>
+                        </div>
+                    </div>
+                } bordered>
+                    {isSelectionMode && selectedMessages.length > 0 && (
+                        <Button
+                            type="danger"
+                            style={{ marginBottom: "8px" }}
+                            onClick={() => handleDeleteSelectedMessages()}
+                        >
+                            Delete Selected Messages
+                        </Button>
+                    )}
                     <div
                         ref={chatContainerRef}
                         className="chat-container"
@@ -220,8 +257,19 @@ function PatientChat() {
                                     alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
                                     margin: "8px 0",
                                     paddingRight: "8px",
+                                    position: "relative",
                                 }}
                             >
+                                {isSelectionMode && (
+                                    <Checkbox
+                                        checked={selectedMessages.includes(msg._id)}
+                                        onChange={() => handleSelectMessage(msg._id)}
+                                        style={{
+                                            marginRight: "8px",
+                                            color: "green",
+                                        }}
+                                    />
+                                )}
                                 <div
                                     style={{
                                         position: "relative",
@@ -287,7 +335,7 @@ function PatientChat() {
                         ))}
                     </div>
 
-                    {selectedTicket?.status === 0 && (
+                    {!isSelectionMode && selectedTicket?.status === 0 && (
                         <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
                             <Upload
                                 name="image"

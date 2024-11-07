@@ -206,15 +206,112 @@ contect number: 8700710792
 
 -----------------------------------------------------------------------------------------------------------------------
 
-const handleImageUpload = async (file) => {
-        const formData = new FormData();
-        formData.append("image", file);
-        const response = await post(`${API_URL}api/admin/upload`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        }).then((response) => {
-            console.log("Upload response:", response);
-            setUploadedImage(response);
-        }).catch((error) => {
-            toastMessage(error);
-        })
-    }
+import React, { useEffect, useState, useRef } from "react";
+import { Row, Col, Card, Input, Button, Typography, Modal, Upload, Checkbox } from "antd"; 
+import { CloseOutlined, PlusOutlined, EllipsisOutlined } from "@ant-design/icons";
+import { Popover, Space } from "antd";
+import { socket } from "../../utils/socket";
+import { useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { API_URL } from "../../services/config";
+import { get, post, Delete } from "../../services/axios";
+import { showLoading, hideLoading } from "../../redux/alertsSlice";
+
+const { Paragraph, Title } = Typography;
+
+function AdminChat() {
+    const chatContainerRef = useRef(null);
+    const location = useLocation();
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState("");
+    const [selectedTicket, setSelectedTicket] = useState(null);
+    const [isImageModalVisible, setIsImageModalVisible] = useState(false);
+    const [uploadedImage, setUploadedImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [fileList, setFileList] = useState([]);
+    const [modalImageSrc, setModalImageSrc] = useState("");
+    const [reply, setReply] = useState("");
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedMessages, setSelectedMessages] = useState([]);
+    const dispatch = useDispatch();
+    const ticketId = selectedTicket?._id;
+    const userId = localStorage.getItem("id");
+    const id = location.state.ticket._id;
+
+    return (
+        <Row>
+            <Col span={16} style={{ padding: "8px" }}>
+                <Card
+                    title={
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span>Chat</span>
+                            <Button type="primary" onClick={() => setIsSelectionMode(!isSelectionMode)}>
+                                {isSelectionMode ? "Cancel" : "Select Messages"}
+                            </Button>
+                        </div>
+                    }
+                    bordered
+                >
+                    {isSelectionMode && selectedMessages.length > 0 && (
+                        <Button
+                            type="danger"
+                            style={{ marginBottom: "8px" }}
+                            onClick={() => handleDeleteSelectedMessages()}
+                        >
+                            Delete Selected Messages
+                        </Button>
+                    )}
+                    <div ref={chatContainerRef} style={{ maxHeight: "295px", overflowY: "auto" }}>
+                        {messages.map((msg, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    margin: "8px 0",
+                                    paddingRight: "8px",
+                                    position: "relative",
+                                }}
+                            >
+                                {isSelectionMode && (
+                                    <Checkbox
+                                        checked={selectedMessages.includes(msg._id)}
+                                        onChange={() => handleSelectMessage(msg._id)}
+                                        style={{
+                                            position: "absolute",
+                                            top: "10px",
+                                            left: msg.senderId === userId ? "-20px" : "10px",
+                                        }}
+                                    />
+                                )}
+                                <div
+                                    style={{
+                                        position: "relative",
+                                        background: msg.senderId === userId ? "#1890ff" : "#f0f0f0",
+                                        color: msg.senderId === userId ? "white" : "black",
+                                        padding: "8px 12px",
+                                        borderRadius: "8px",
+                                        maxWidth: "70%",
+                                    }}
+                                >
+                                    {msg.messages}
+                                </div>
+                                <div
+                                    style={{
+                                        fontSize: "12px",
+                                        color: "lightgray",
+                                        marginTop: "4px",
+                                        alignSelf: msg.senderId === userId ? "flex-end" : "flex-start",
+                                    }}
+                                >
+                                    {msg.time}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+            </Col>
+        </Row>
+    );
+}
